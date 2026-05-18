@@ -25,6 +25,33 @@ results/raw/*.pkl
 results/raw/*.npy
 results/raw/*.npz
 results/raw/*.jsonl
+results/curves/
+
+# legacy 旧成果只允许手工精选后提交，不要整包推 GitHub
+legacy/**/*.zip
+legacy/**/*.rar
+legacy/**/*.7z
+legacy/**/*.tar
+legacy/**/*.gz
+legacy/**/*.csv
+legacy/**/*.xlsx
+legacy/**/*.pkl
+legacy/**/*.npy
+legacy/**/*.npz
+legacy/**/*.pdf
+legacy/**/*.png
+legacy/**/*.jpg
+legacy/**/*.jpeg
+legacy/**/*.log
+legacy/**/__pycache__/
+
+# 如果确实要保留 legacy 目录结构，可以提交 .gitkeep、README、md、py、tex 等小文件
+!legacy/**/.gitkeep
+!legacy/**/*.md
+!legacy/**/*.py
+!legacy/**/*.tex
+!legacy/**/*.bib
+!legacy/**/*.txt
 
 # 临时分析文件
 results/tmp/
