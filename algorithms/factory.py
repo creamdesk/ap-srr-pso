@@ -91,6 +91,66 @@ def build_optimizer(name: str, *, population_size: int, seed: int | None = None,
         )
         return _with_operators(opt, ["local", "differential"], "AP-SRR-PSO-RARE")
 
+    # 精筛 1：RARE-DIFF 稳健版，优先平衡稳定性和跳出能力。
+    if key in {"AP-SRR-PSO-RD", "AP-SRR-RD", "AP-SRR-PSO-RARE-DIFF"}:
+        opt = ConservativeAPSRRPSO(
+            **common,
+            stagnation_threshold=60,
+            diversity_threshold=0.0,
+            rho_min=0.010,
+            rho_max=0.14,
+            elite_ratio=0.28,
+            local_sigma=0.030,
+            softmax_temperature=0.65,
+            **kwargs,
+        )
+        return _with_operators(opt, ["local", "differential"], "AP-SRR-PSO-RD")
+
+    # 精筛 2：RARE-DIFF-C，极稳健版，重点降低 F1/F10 的极端坏 run。
+    if key in {"AP-SRR-PSO-RD-C", "AP-SRR-RD-C"}:
+        opt = ConservativeAPSRRPSO(
+            **common,
+            stagnation_threshold=75,
+            diversity_threshold=0.0,
+            rho_min=0.005,
+            rho_max=0.10,
+            elite_ratio=0.32,
+            local_sigma=0.022,
+            softmax_temperature=0.75,
+            **kwargs,
+        )
+        return _with_operators(opt, ["local", "differential"], "AP-SRR-PSO-RD-C")
+
+    # 精筛 3：RARE-DIFF-M，稍强响应版，针对 F10/F复杂多峰做补偿。
+    if key in {"AP-SRR-PSO-RD-M", "AP-SRR-RD-M"}:
+        opt = ConservativeAPSRRPSO(
+            **common,
+            stagnation_threshold=50,
+            diversity_threshold=0.0,
+            rho_min=0.015,
+            rho_max=0.18,
+            elite_ratio=0.25,
+            local_sigma=0.035,
+            softmax_temperature=0.60,
+            **kwargs,
+        )
+        return _with_operators(opt, ["local", "differential"], "AP-SRR-PSO-RD-M")
+
+    # 精筛 4：RARE-DIFF-E，带少量安全全局探索，测试复杂函数上是否值得保留 global。
+    if key in {"AP-SRR-PSO-RD-E", "AP-SRR-RD-E"}:
+        opt = ConservativeAPSRRPSO(
+            **common,
+            stagnation_threshold=55,
+            diversity_threshold=0.0,
+            rho_min=0.015,
+            rho_max=0.16,
+            elite_ratio=0.25,
+            local_sigma=0.035,
+            softmax_temperature=0.65,
+            **kwargs,
+        )
+        return _with_operators(opt, ["local", "differential", "global"], "AP-SRR-PSO-RD-E")
+
     # 方向 D：中等强度组合策略，保留 portfolio，但限制破坏性算子比例。
     if key in {"AP-SRR-PSO-PORTFOLIO", "AP-SRR-PORTFOLIO"}:
         opt = ConservativeAPSRRPSO(
