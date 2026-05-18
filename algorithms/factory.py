@@ -4,7 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from algorithms.ap_srr_pso import APSRRPSO
+from algorithms.ap_srr_pso import APSRRPSO as AggressiveAPSRRPSO
+from algorithms.ap_srr_pso_v2 import ConservativeAPSRRPSO
 from algorithms.arpso_srr import ARPSOSRR
 from algorithms.de import DifferentialEvolution
 from algorithms.pso import PSO
@@ -24,14 +25,16 @@ def build_optimizer(name: str, *, population_size: int, seed: int | None = None,
         return PSOAW(**common, **kwargs)
     if key in {"ARPSO-SRR", "ARPSO-SRR-BASE", "ARPSO-V4"}:
         return ARPSOSRR(**common, **kwargs)
-    if key in {"AP-SRR-PSO", "APSRRPSO"}:
-        return APSRRPSO(**common, **kwargs)
+    if key in {"AP-SRR-PSO", "APSRRPSO", "AP-SRR-PSO-V2"}:
+        return ConservativeAPSRRPSO(**common, **kwargs)
+    if key in {"AP-SRR-PSO-V1", "AP-SRR-PSO-AGGRESSIVE"}:
+        return AggressiveAPSRRPSO(**common, **kwargs)
     if key in {"AP-SRR-PSO-NO-IPS", "AP-SRR-PSO-WITHOUT-IPS"}:
-        return APSRRPSO(**common, enable_ips=False, **kwargs)
+        return ConservativeAPSRRPSO(**common, enable_ips=False, **kwargs)
     if key in {"AP-SRR-PSO-NO-ARP", "AP-SRR-PSO-WITHOUT-ARP"}:
-        return APSRRPSO(**common, enable_arp=False, **kwargs)
+        return ConservativeAPSRRPSO(**common, enable_arp=False, **kwargs)
     if key in {"AP-SRR-PSO-NO-RCA", "AP-SRR-PSO-WITHOUT-RCA"}:
-        return APSRRPSO(**common, enable_rca=False, **kwargs)
+        return ConservativeAPSRRPSO(**common, enable_rca=False, **kwargs)
     if key == "DE":
         return DifferentialEvolution(**common, **kwargs)
 
