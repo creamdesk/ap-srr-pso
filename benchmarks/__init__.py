@@ -1,5 +1,6 @@
-"""基准函数模块。
+"""基准函数模块。"""
 
-优先提供稳定的 Sphere/Rastrigin 测试函数用于 smoke test。
-正式 CEC2017/CEC2022 适配器后续在 cec_adapter.py 中补充。
-"""
+from benchmarks.basic_functions import ackley, rastrigin, sphere
+from benchmarks.problem_factory import build_problem
+
+__all__ = ["sphere", "rastrigin", "ackley", "build_problem"]
