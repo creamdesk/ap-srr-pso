@@ -1,0 +1,57 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境
+.venv/
+venv/
+env/
+ENV/
+
+# 构建产物
+build/
+dist/
+*.egg-info/
+
+# 日志
+logs/
+*.log
+
+# 大规模实验原始结果：默认不直接提交
+results/raw/*.csv
+results/raw/*.xlsx
+results/raw/*.pkl
+results/raw/*.npy
+results/raw/*.npz
+results/raw/*.jsonl
+
+# 临时分析文件
+results/tmp/
+*.tmp
+*.bak
+
+# LaTeX 编译缓存
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# 不提交本地私有数据
+local_data/
+private_data/
