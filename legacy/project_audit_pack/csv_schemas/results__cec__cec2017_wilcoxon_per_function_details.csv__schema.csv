@@ -1,0 +1,9 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Function,object,50,CEC2017-F1
+BaseAlgorithm,object,50,ARPSO-EIS
+ComparedAlgorithm,object,50,PSO
+BaseMean,float64,50,11291.30470381012
+ComparedMean,float64,50,1248012545.1937678
+Statistic,float64,50,89.0
+PValue,float64,50,0.0023674946278333
+Result,object,50,Win

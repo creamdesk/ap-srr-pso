@@ -1,0 +1,24 @@
+\begin{table*}[t]
+\centering
+\caption{Optimization results (mean $\pm$ standard deviation) of different algorithms on six test functions}
+\label{tab:main_results}
+\scriptsize
+\setlength{\tabcolsep}{3.2pt}
+\renewcommand{\arraystretch}{1.16}
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lccccccc}
+\toprule
+Function & \alg{PSO} & \alg{PSO-AW} & \alg{PSO-RS} & \alg{GA} & \alg{DE} & \alg{ARPSO-v4} & \alg{ARPSO-v5} \\
+\midrule
+Sphere & $65.9188\pm 28.7666$ & $0.0089\pm 0.0097$ & $72.6410\pm 36.6421$ & $99.8126\pm 18.5967$ & $\bm{4.57\times 10^{-5}\pm 4.92\times 10^{-5}}$ & $0.0093\pm 0.0083$ & $0.0076\pm 0.0094$ \\
+Rastrigin & $79.3541\pm 21.4257$ & $52.8776\pm 13.6068$ & $80.6990\pm 17.6673$ & $66.9865\pm 10.8531$ & $186.4047\pm 13.4860$ & $\bm{51.7747\pm 15.4930}$ & $54.3913\pm 12.0586$ \\
+Rosenbrock & $4889.4005\pm 3312.7325$ & $3242.4179\pm 1.64\times 10^{4}$ & $5270.2787\pm 4673.8559$ & $1840.4272\pm 528.3740$ & $\bm{75.1195\pm 88.5650}$ & $320.0929\pm 752.8821$ & $428.2590\pm 914.9912$ \\
+Ackley & $3.4538\pm 0.3126$ & $0.1341\pm 0.3867$ & $3.6530\pm 0.5968$ & $3.8283\pm 0.2009$ & $\bm{0.0026\pm 0.0017}$ & $0.1868\pm 0.4549$ & $0.2201\pm 0.4718$ \\
+Griewank & $1.6468\pm 0.2368$ & $0.0266\pm 0.0257$ & $1.6111\pm 0.3001$ & $1.9007\pm 0.1491$ & $\bm{8.66\times 10^{-4}\pm 0.0029}$ & $0.0269\pm 0.0192$ & $0.0477\pm 0.0863$ \\
+Schwefel & $4241.9666\pm 584.3932$ & $3879.5214\pm 658.0285$ & $4250.8391\pm 602.9213$ & $\bm{3401.7131\pm 560.7620}$ & $6695.6696\pm 805.5116$ & $3513.3851\pm 658.6575$ & $3594.2830\pm 629.0201$ \\
+\bottomrule
+\end{tabular}
+}
+\vspace{0.25em}
+\parbox{0.96\textwidth}{\footnotesize Note: The results are the mean and standard deviation of the final best fitness values from 30 independent runs. Bold indicates the best result on that test function. All test functions are minimization problems; smaller values indicate better optimization performance.}
+\end{table*}

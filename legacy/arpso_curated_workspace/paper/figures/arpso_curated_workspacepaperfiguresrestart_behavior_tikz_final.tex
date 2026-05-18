@@ -1,0 +1,132 @@
+\documentclass[tikz,border=2pt]{standalone}
+
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\usepackage{newtxtext,newtxmath}
+
+\pgfplotsset{compat=1.18}
+
+\definecolor{mainGreen}{RGB}{39,125,74}
+\definecolor{lightGreen}{RGB}{217,239,211}
+\definecolor{softGray}{RGB}{120,120,120}
+
+\begin{document}
+
+\begin{tikzpicture}
+
+    \begin{axis}[
+            width=3.55in,
+            height=2.25in,
+            xmin=0,
+            xmax=300000,
+            ymin=0,
+            ymax=0.205,
+            axis line style={black!75, line width=0.45pt},
+            tick style={black!65, line width=0.35pt},
+            major grid style={black!10, line width=0.35pt},
+            grid=both,
+            minor tick num=1,
+            xlabel={Function evaluations},
+            ylabel={Mean restart ratio},
+            xlabel style={font=\footnotesize},
+            ylabel style={font=\footnotesize},
+            tick label style={font=\scriptsize},
+            xtick={0,50000,100000,150000,200000,250000,300000},
+            xticklabels={0,50k,100k,150k,200k,250k,300k},
+            ytick={0,0.05,0.10,0.15,0.20},
+            yticklabels={0,0.05,0.10,0.15,0.20},
+            enlarge x limits=false,
+            clip=false,
+        ]
+
+        % ------------------------------------------------------------
+        % Data bars: mean restart ratio over evaluation intervals
+        % ------------------------------------------------------------
+        \addplot[
+            ybar,
+            bar width=6.0pt,
+            draw=mainGreen,
+            line width=0.45pt,
+            fill=lightGreen,
+            fill opacity=0.88,
+        ] coordinates {
+                (12500,0.000)
+                (37500,0.000)
+                (62500,0.000)
+                (87500,0.000)
+                (112500,0.000)
+                (137500,0.120)
+                (162500,0.167)
+                (187500,0.177)
+                (212500,0.178)
+                (237500,0.179)
+                (262500,0.179)
+                (287500,0.179)
+            };
+
+        % ------------------------------------------------------------
+        % Trend line to emphasize the adaptive increase and saturation
+        % ------------------------------------------------------------
+        \addplot[
+            mainGreen,
+            line width=0.85pt,
+            mark=*,
+            mark size=1.05pt,
+            mark options={fill=white, draw=mainGreen, line width=0.45pt},
+        ] coordinates {
+                (12500,0.000)
+                (37500,0.000)
+                (62500,0.000)
+                (87500,0.000)
+                (112500,0.000)
+                (137500,0.120)
+                (162500,0.167)
+                (187500,0.177)
+                (212500,0.178)
+                (237500,0.179)
+                (262500,0.179)
+                (287500,0.179)
+            };
+
+        % ------------------------------------------------------------
+        % Reference line: restart activation region
+        % ------------------------------------------------------------
+        \addplot[
+            softGray,
+            dashed,
+            line width=0.55pt,
+        ] coordinates {
+                (125000,0)
+                (125000,0.205)
+            };
+
+        \node[
+            anchor=south west,
+            align=left,
+            font=\scriptsize,
+            text=black!75,
+        ] at (axis cs:127000,0.010)
+        {restart\\activation};
+
+        % ------------------------------------------------------------
+        % Annotation: stabilized adaptive restart stage
+        % ------------------------------------------------------------
+        \draw[
+            -{Latex[length=1.5mm]},
+            mainGreen,
+            line width=0.55pt,
+        ] (axis cs:218000,0.194) -- (axis cs:238000,0.181);
+
+        \node[
+            anchor=south,
+            align=center,
+            font=\scriptsize,
+            text=black!80,
+        ] at (axis cs:218000,0.194)
+        {adaptive restart\\stabilizes};
+
+    \end{axis}
+
+\end{tikzpicture}
+
+\end{document}

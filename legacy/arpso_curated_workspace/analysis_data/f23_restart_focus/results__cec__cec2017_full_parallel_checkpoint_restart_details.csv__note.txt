@@ -1,0 +1,9 @@
+source=results\cec\cec2017_full_parallel_checkpoint_restart_details.csv
+size_mb=9.88
+algorithm_col=Algorithm
+function_id_col=__FunctionID_extracted
+function_col=Function
+run_col=Run
+fe_col=RestartIter
+read_rows=124599
+kept_F20_F24_rows=0

@@ -1,0 +1,9 @@
+﻿ComparedAlgorithm,Win,NSD,Loss
+ARPSO-v4,1,27,1
+CLPSO,5,8,16
+DE,3,2,24
+GA,10,9,10
+HPSO-TVAC,11,11,7
+PSO,20,8,1
+PSO-AW,20,9,0
+PSO-RS,16,10,3

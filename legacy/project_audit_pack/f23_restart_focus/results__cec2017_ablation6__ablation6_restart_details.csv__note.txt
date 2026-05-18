@@ -1,0 +1,9 @@
+source=results\cec2017_ablation6\ablation6_restart_details.csv
+size_mb=1088.10
+algorithm_col=Algorithm
+function_id_col=FunctionID
+function_col=Function
+run_col=Run
+fe_col=FE
+read_rows=10356741
+kept_F20_F24_rows=1950469

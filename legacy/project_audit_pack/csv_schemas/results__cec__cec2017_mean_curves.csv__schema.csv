@@ -1,0 +1,5 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Function,object,50,CEC2017-F1
+Algorithm,object,50,ARPSO-EIS
+Iteration,int64,50,1
+MeanBest,float64,50,82952624979.94313

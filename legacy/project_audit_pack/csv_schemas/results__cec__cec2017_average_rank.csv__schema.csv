@@ -1,0 +1,3 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,9,DE
+AverageRank,float64,9,1.9655172413793105

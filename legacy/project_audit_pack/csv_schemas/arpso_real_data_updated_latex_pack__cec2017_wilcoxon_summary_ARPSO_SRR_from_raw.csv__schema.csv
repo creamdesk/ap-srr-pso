@@ -1,0 +1,6 @@
+﻿column,dtype_from_head,non_null_in_head,example
+BaseAlgorithm,object,8,ARPSO-SRR
+ComparedAlgorithm,object,8,PSO
+Win,int64,8,17
+NSD,int64,8,11
+Loss,int64,8,1

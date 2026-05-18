@@ -1,0 +1,7 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Function,object,50,CEC2017-F1
+Algorithm,object,50,ARPSO-EIS
+AvgRestart,float64,50,74.0
+StdRestart,float64,50,0.0
+MaxRestart,int64,50,74
+MinRestart,int64,50,74

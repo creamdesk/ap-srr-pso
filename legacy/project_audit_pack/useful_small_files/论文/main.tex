@@ -1,0 +1,473 @@
+\pdfminorversion=7
+\documentclass[conference]{IEEEtran}
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{graphicx}
+\graphicspath{{../figures/}{figures/}}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+
+\makeatletter
+\newcommand{\safeincludegraphics}[2][]{%
+  \begingroup
+  \IfFileExists{#2}{%
+    \includegraphics[#1]{#2}%
+  }{%
+    \IfFileExists{figures/#2}{%
+      \includegraphics[#1]{figures/#2}%
+    }{%
+      \IfFileExists{../figures/#2}{%
+        \includegraphics[#1]{../figures/#2}%
+      }{%
+        \fbox{\parbox{0.92\linewidth}{\centering Missing figure file: \texttt{\detokenize{#2}}}}%
+      }%
+    }%
+  }%
+  \endgroup
+}
+\makeatother
+
+\newcommand{\placeholderfigure}[1]{%
+\fbox{\parbox{0.92\linewidth}{\centering #1}}}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Adaptive Restart Particle Swarm Optimization Based on Search Resource Reallocation}
+
+\author{
+    \IEEEauthorblockN{1\textsuperscript{st} Chenshuo Cai}
+    \IEEEauthorblockA{
+        \textit{Xinyang Normal University}\\
+        Xinyang, China\\
+        caichenshuo@foxmail.com
+    }
+    \and
+    \IEEEauthorblockN{2\textsuperscript{nd} Zhongyang Chen*}
+    \IEEEauthorblockA{
+        \textit{Xinyang Normal University}\\
+        Xinyang, China\\
+        czy112@xynu.edu.cn\\
+        *Corresponding author
+    }
+}
+
+\maketitle
+
+\begin{abstract}
+Particle swarm optimization (PSO) is widely used for continuous numerical optimization because of its simple structure and few control parameters. However, standard PSO often suffers from premature convergence when particles rapidly aggregate around local optima and continue consuming function evaluations with limited search contribution. To address this problem, this paper proposes an adaptive restart PSO algorithm based on search resource reallocation, named ARPSO-SRR. The proposed method detects stagnation and diversity loss, adaptively determines restart intensity, and combines global random regeneration with local perturbation around promising regions. The key idea is to reallocate search resources from stagnated or redundant particles to new search positions under the same function evaluation budget. An inefficient particle identification based variant is also investigated as an ablation variant to examine whether a more complex particle selection rule provides additional benefit. Experiments are conducted on 29 benchmark functions (F1 and F3--F30) from the CEC2017 suite, where F2 is not included in the adopted implementation, and each function is evaluated over 30 independent runs. The results show that ARPSO-SRR consistently improves over standard PSO and several PSO variants, while remaining lightweight in runtime. Although differential evolution and comprehensive learning PSO achieve stronger overall ranks, ARPSO-SRR provides a simple and effective restart-based enhancement for the PSO framework.
+\end{abstract}
+
+\begin{IEEEkeywords}
+particle swarm optimization, adaptive restart, hybrid restart, search resource reallocation, numerical optimization
+\end{IEEEkeywords}
+
+\section{Introduction}
+Particle swarm optimization (PSO) is a population-based metaheuristic inspired by collective behavior and has been widely used for continuous optimization problems \cite{b1}. In PSO, each particle updates its position according to its own historical best solution and the best solution found by the swarm. This simple learning mechanism makes PSO easy to implement and suitable for many black-box optimization problems where gradient information is unavailable.
+
+Despite these advantages, standard PSO may suffer from premature convergence. When particles rapidly gather around a local optimum, population diversity decreases and many particles repeatedly search similar positions. These particles still consume function evaluations, but their contribution to further improvement becomes limited. Under a fixed evaluation budget, this phenomenon can be understood as inefficient use of search resources.
+
+Many PSO variants have been proposed to improve exploration and exploitation. Adaptive inertia weight strategies adjust the search tendency during different stages \cite{b2}. Stability-oriented and constriction-based analyses improve the understanding of PSO dynamics \cite{b3}. Comprehensive learning PSO (CLPSO) maintains diversity by allowing particles to learn from different exemplars \cite{b4}. Restart strategies provide another practical solution by regenerating part of the swarm when stagnation occurs.
+
+However, two issues remain important for restart-based PSO. First, restart intensity should not be fixed. A weak restart may be insufficient to escape a local optimum, while an overly strong restart may destroy useful exploitation around promising regions. Second, restart should be interpreted not only as random regeneration, but also as search resource reallocation. In later iterations, some particles provide little new information. Reassigning these particles to new positions can improve the use of the same computational budget.
+
+Based on this motivation, this paper proposes an adaptive restart PSO algorithm based on search resource reallocation, denoted as ARPSO-SRR. The proposed method detects stagnation and diversity loss, determines the restart intensity adaptively, and uses a hybrid restart strategy that combines global random regeneration and local perturbation around the current best region. The proposed method keeps the main structure of PSO unchanged and introduces only lightweight additional operations.
+
+The main contributions of this paper are summarized as follows:
+\begin{itemize}
+    \item An adaptive restart PSO framework based on search resource reallocation is proposed to alleviate premature convergence under a fixed function evaluation budget.
+    \item A hybrid restart strategy is designed by combining global random regeneration and local perturbation, so that exploration and exploitation can be balanced during restart.
+    \item An inefficient particle identification based variant is studied as an ablation and comparison variant, which helps analyze whether more complex particle selection brings stable additional improvement.
+    \item Experiments on 29 CEC2017 benchmark functions are conducted. Average ranking, function-group ranking, convergence behavior, restart behavior, runtime analysis, Friedman test, and Wilcoxon signed-rank test are used to evaluate the proposed method.
+\end{itemize}
+
+The remainder of this paper is organized as follows. Section~\ref{sec:related} reviews related work. Section~\ref{sec:method} introduces the proposed ARPSO-SRR. Section~\ref{sec:experiment} describes the experimental setup. Section~\ref{sec:results} reports and discusses the experimental results. Section~\ref{sec:conclusion} concludes this paper.
+
+\section{Related Work}\label{sec:related}
+
+\subsection{Standard PSO}
+Let $x_i^t$ and $v_i^t$ denote the position and velocity of particle $i$ at iteration $t$. The velocity and position update equations of standard PSO are
+\begin{equation}
+    v_i^{t+1}=w v_i^t+c_1 r_1(p_i^t-x_i^t)+c_2 r_2(g^t-x_i^t),
+    \label{eq:pso_velocity}
+\end{equation}
+\begin{equation}
+    x_i^{t+1}=x_i^t+v_i^{t+1},
+    \label{eq:pso_position}
+\end{equation}
+where $w$ is the inertia weight, $c_1$ and $c_2$ are acceleration coefficients, $r_1$ and $r_2$ are uniformly sampled random numbers, $p_i^t$ is the personal best position, and $g^t$ is the global best position.
+
+The performance of PSO depends heavily on the balance between exploration and exploitation. A larger inertia weight usually encourages global exploration, while a smaller inertia weight encourages local exploitation. However, once the swarm is highly concentrated, changing velocity parameters alone may not be sufficient to recover useful diversity.
+
+\subsection{Adaptive and Learning-based PSO Variants}
+Adaptive PSO variants attempt to improve the search process by changing inertia weights or learning coefficients during evolution \cite{b2,b12}. HPSO-TVAC adjusts acceleration coefficients over time to improve the transition from exploration to exploitation \cite{b11}. CLPSO allows each dimension of a particle to learn from different exemplars and therefore provides stronger diversity preservation than standard global-best PSO \cite{b4}. These methods are useful baselines because they represent parameter adaptation and learning-structure modification.
+
+Compared with these methods, restart-based strategies follow a different direction. They do not necessarily modify the basic velocity update rule. Instead, they reactivate the population by relocating part of the swarm when stagnation or diversity loss is detected. This makes restart-based methods simple and easy to combine with existing PSO variants.
+
+\subsection{Restart Strategies}
+Restart mechanisms are widely used to reduce the risk of premature convergence \cite{b13,b14}. A simple restart strategy regenerates some particles randomly when no improvement is observed for a certain number of iterations. More complex strategies may select particles according to their fitness, distance, contribution, or stagnation history.
+
+From the perspective of resource allocation, a restarted particle is not merely ``reset''. Its future function evaluations are transferred from a low-contribution search trajectory to a new candidate region. Therefore, a good restart strategy should answer three questions: when to restart, how many particles to restart, and how to regenerate restarted particles. ARPSO-SRR is designed around these three questions.
+
+\section{Proposed Method}\label{sec:method}
+
+\subsection{Motivation and Overall Framework}
+In standard PSO, all particles continue to consume function evaluations until the termination condition is met. However, after premature convergence occurs, some particles may repeatedly explore redundant positions around the same local region. ARPSO-SRR treats this phenomenon as inefficient search resource usage. The goal is to identify the search state and reallocate part of the population to more useful regions.
+
+The framework of ARPSO-SRR contains three main components. First, stagnation and diversity indicators are used to detect whether the swarm is losing effective search ability. Second, the restart intensity is calculated adaptively according to the search state. Third, a hybrid restart operator is used to combine global exploration and local exploitation. The overall framework is shown in Fig.~\ref{fig:framework}.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{framework_tikz_final.pdf}
+    \caption{Framework of the proposed ARPSO-SRR.}
+    \label{fig:framework}
+\end{figure}
+
+\subsection{Stagnation and Diversity Detection}
+Population diversity is used to describe the distribution of particles in the search space. To make the diversity threshold comparable under different coordinate scales, each particle is first normalized by the search boundary:
+\begin{equation}
+    \tilde{x}_i^t=\frac{x_i^t-l}{u-l},
+    \label{eq:normalized_position}
+\end{equation}
+where $l$ and $u$ are the lower and upper bounds of the search space. The normalized diversity is then defined as
+\begin{equation}
+    D^t=\frac{1}{N\sqrt{D}}\sum_{i=1}^{N}
+    \left\|\tilde{x}_i^t-\bar{\tilde{x}}^t\right\|_2,
+    \label{eq:diversity}
+\end{equation}
+where $N$ is the population size, $D$ is the dimension, and $\bar{\tilde{x}}^t$ is the center of the normalized swarm at iteration $t$. A smaller value of $D^t$ indicates that particles are more concentrated.
+
+Stagnation is measured by the number of consecutive iterations without global best improvement. Let $s^t$ denote the current stagnation length. The restart condition is activated when $s^t\ge s_{\mathrm{thr}}$ or $D^t\le D_{\mathrm{thr}}$, where $s_{\mathrm{thr}}$ and $D_{\mathrm{thr}}$ are given in Table~\ref{tab:parameters}. This design allows ARPSO-SRR to respond to both fitness stagnation and diversity loss.
+
+\subsection{Adaptive Restart Intensity}
+A fixed restart ratio cannot adapt to different search stages. Therefore, ARPSO-SRR uses an adaptive restart ratio:
+\begin{equation}
+    \rho^t=\rho_{\min}+(\rho_{\max}-\rho_{\min})Q^t,
+    \label{eq:restart_ratio}
+\end{equation}
+where $\rho_{\min}$ and $\rho_{\max}$ are the lower and upper bounds of the restart ratio, and $Q^t$ is a normalized restart demand indicator. In this study, $Q^t$ is computed by
+\begin{equation}
+\begin{aligned}
+q_s^t &= \min\left(1,\frac{s^t}{3s_{\mathrm{thr}}}\right),\\
+q_D^t &= \max\left(0,\frac{D_{\mathrm{thr}}-D^t}{D_{\mathrm{thr}}}\right),\\
+Q^t &= \max(q_s^t,q_D^t),
+\end{aligned}
+\label{eq:restart_demand}
+\end{equation}
+where $q_s^t$ reflects prolonged stagnation and $q_D^t$ reflects diversity loss. The number of restarted particles is calculated as
+\begin{equation}
+    m^t=\left\lceil \rho^t N \right\rceil .
+    \label{eq:restart_number}
+\end{equation}
+
+This mechanism avoids using the same restart strength in all situations. A mild restart is used when the swarm only shows weak stagnation, while a stronger restart is used when the search state indicates serious convergence.
+
+\subsection{Hybrid Restart Strategy}
+The restart operation consists of two complementary strategies. The first strategy is global random regeneration:
+\begin{equation}
+    x_i^{t+1}=l+(u-l)\odot r,
+    \label{eq:global_restart}
+\end{equation}
+where $l$ and $u$ are the lower and upper bounds of the search space, $r$ is a random vector sampled from a uniform distribution, and $\odot$ denotes element-wise multiplication. This operator introduces new global exploration ability.
+
+The second strategy is local perturbation around the current global best:
+\begin{equation}
+    x_i^{t+1}=g^t+\sigma^t (u-l)\odot z,
+    \label{eq:local_restart}
+\end{equation}
+where $g^t$ is the current global best position, $z$ is a random vector, and $\sigma^t$ controls the perturbation strength. In this study, $\sigma^t$ is bounded by $\sigma_{\min}$ and $\sigma_{\max}$ and gradually reduced with the search process. Therefore, local restart is broader in earlier stages and more exploitative in later stages.
+
+The hybrid strategy avoids two extreme cases. Pure global restart may discard useful information near promising regions, while pure local restart may fail to recover enough diversity. By combining both operators, ARPSO-SRR reallocates search resources while preserving useful exploitation.
+
+\subsection{Inefficient Particle Identification Variant}
+In addition to the main ARPSO-SRR framework, this paper also considers an inefficient particle identification based variant, denoted as ARPSO-EIS. For ARPSO-EIS, particles are selected according to an inefficient-particle score that combines fitness disadvantage, spatial crowding, historical contribution, and individual stagnation. This variant is used only for ablation and comparison, rather than as the main proposed method.
+
+The inefficient-particle score is defined as
+\begin{equation}
+    S_i=\alpha S_i^{fit}+\beta S_i^{crowd}+\gamma S_i^{contrib}+\delta S_i^{stag},
+    \label{eq:eis_score}
+\end{equation}
+where $S_i^{fit}$ measures the normalized fitness disadvantage, $S_i^{crowd}$ measures spatial crowding, $S_i^{contrib}$ measures the lack of historical personal-best contribution, and $S_i^{stag}$ measures individual stagnation. In this study, $\alpha=0.40$, $\beta=0.25$, $\gamma=0.20$, and $\delta=0.15$. Particles with larger $S_i$ values are considered less efficient and are more likely to be restarted.
+
+\subsection{Algorithm Procedure}
+The pseudo-code of ARPSO-SRR is given in Algorithm~\ref{alg:arpso_srr}. The algorithm first performs standard PSO updates. Then it monitors stagnation and diversity. If the restart condition is satisfied, the adaptive restart ratio is calculated and hybrid restart is applied to selected particles.
+
+\begin{algorithm}[H]
+\caption{ARPSO-SRR}
+\label{alg:arpso_srr}
+\begin{algorithmic}[1]
+\State Initialize particle positions $x_i$ and velocities $v_i$
+\State Evaluate particles and initialize $p_i$ and $g$
+\State Initialize stagnation counter and diversity record
+\While{termination criterion is not satisfied}
+    \State Update velocities using \eqref{eq:pso_velocity}
+    \State Update positions using \eqref{eq:pso_position}
+    \State Evaluate particles and update $p_i$ and $g$
+    \State Measure normalized diversity $D^t$ using \eqref{eq:diversity}
+    \State Update stagnation counter $s^t$
+    \If{restart condition is satisfied}
+        \State Calculate restart ratio $\rho^t$ using \eqref{eq:restart_ratio}
+        \State Determine restart number $m^t$ using \eqref{eq:restart_number}
+        \State Select particles for search resource reallocation
+        \State Apply global random regeneration to part of selected particles
+        \State Apply local perturbation around $g$ to remaining selected particles
+        \State Reset stagnation-related records
+    \EndIf
+\EndWhile
+\State \Return best solution $g$
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Complexity Analysis}
+The position and velocity update of standard PSO has a computational complexity of $O(ND)$ per iteration, where $N$ is the population size and $D$ is the dimension. The diversity calculation in \eqref{eq:diversity} also requires $O(ND)$ operations. The restart operation modifies at most $N$ particles and therefore has a worst-case complexity of $O(ND)$. As a result, ARPSO-SRR does not change the asymptotic computational complexity of standard PSO. Its additional cost is mainly a small constant factor, and the total number of function evaluations remains unchanged.
+
+\section{Experimental Setup}\label{sec:experiment}
+
+\subsection{Benchmark Functions}
+Experiments are conducted on the CEC2017 single-objective real-parameter benchmark suite \cite{b5}. In the adopted implementation, F2 is not included, so F1 and F3--F30 are used, resulting in 29 test functions. All experiments are conducted in 30 dimensions. The maximum number of function evaluations is set to $10{,}000D$, i.e., 300000 evaluations for each run.
+
+The benchmark functions include unimodal, simple multimodal, hybrid, and composition functions. Table~\ref{tab:function_groups} summarizes the function groups used in the analysis.
+
+\begin{table}[!t]
+\caption{CEC2017 Function Groups Used in the Experiments}
+\centering
+\begin{tabular}{cc}
+\toprule
+Group & Functions \\
+\midrule
+Unimodal & F1, F3 \\
+Simple multimodal & F4--F10 \\
+Hybrid & F11--F20 \\
+Composition & F21--F30 \\
+\bottomrule
+\end{tabular}
+\label{tab:function_groups}
+\end{table}
+
+\subsection{Compared Algorithms and Parameters}
+ARPSO-SRR is compared with eight algorithms: standard PSO, PSO with adaptive inertia weight (PSO-AW), PSO with random restart (PSO-RS), CLPSO, HPSO-TVAC, genetic algorithm (GA), differential evolution (DE), and ARPSO-EIS. ARPSO-EIS is an inefficient particle identification based variant. It is included mainly as an ablation and comparison variant to examine whether a more explicit particle selection mechanism provides additional improvement over ARPSO-SRR.
+
+All algorithms are executed independently 30 times on each function. The population size is 50 for all algorithms. The same maximum number of function evaluations is used for fair comparison. Table~\ref{tab:parameters} lists the main experimental settings.
+
+\begin{table}[!t]
+\caption{Experimental Parameter Settings}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.5pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{ll}
+\toprule
+Parameter & Setting \\
+\midrule
+Dimension & 30 \\
+Population size & 50 \\
+Maximum FEs & 300000 \\
+Independent runs & 30 \\
+Benchmark functions & CEC2017 F1, F3--F30 \\
+Compared algorithms & 9 \\
+Inertia weight range & $w_{\max}=0.9$, $w_{\min}=0.4$ \\
+Acceleration coefficients & $c_1=2.0$, $c_2=2.0$ \\
+Velocity clamp ratio & 0.20 \\
+Stagnation threshold & 50 iterations \\
+Diversity threshold & 0.05 \\
+Restart ratio range & $\rho_{\min}=0.08$, $\rho_{\max}=0.40$ \\
+Restart demand & Eq.~\eqref{eq:restart_demand} \\
+Global/local restart ratio & 0.50 / 0.50 \\
+Local perturbation range & $\sigma_{\min}=0.002$, $\sigma_{\max}=0.06$ \\
+\bottomrule
+\end{tabular}%
+}
+\label{tab:parameters}
+\end{table}
+
+\subsection{Evaluation Metrics}
+The final optimization result of each run is recorded. Mean value, standard deviation, average rank, runtime, and restart count are used for evaluation. For statistical analysis, the Friedman test is used to compare all algorithms over all functions, and the Wilcoxon signed-rank test is used to compare ARPSO-SRR with each competing algorithm \cite{b8,b9,b10}. A significance level of 0.05 is used.
+
+\section{Results and Discussion}\label{sec:results}
+
+\subsection{Ablation Study}
+Table~\ref{tab:ablation} reports the restart-related variants for which complete results are currently available. The rows of ARPSO-Fixed, ARPSO-Global, and ARPSO-Local are reserved for the six-variant ablation study and are left blank in this draft to avoid reporting unverified values.
+
+\begin{table}[!t]
+\caption{Ablation Results of Restart-related Variants}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Algorithm & Avg. rank & Avg. restarts & Avg. runtime (s) \\
+\midrule
+PSO-RS & 6.07 & 8.94 & 76.21 \\
+ARPSO-Fixed & -- & -- & -- \\
+ARPSO-Global & -- & -- & -- \\
+ARPSO-Local & -- & -- & -- \\
+ARPSO-SRR & 4.31 & 67.72 & 71.82 \\
+ARPSO-EIS & 4.45 & 66.55 & 72.07 \\
+\bottomrule
+\end{tabular}
+\label{tab:ablation}
+\end{table}
+
+The completed restart-related results show that ARPSO-SRR obtains a better average rank than PSO-RS and is slightly better than ARPSO-EIS. The result indicates that the adaptive hybrid restart framework is more effective than a simple random restart strategy. The comparison with ARPSO-EIS also indicates that the more complex inefficient-particle identification rule does not provide stable additional improvement in the completed experiment.
+
+Fig.~\ref{fig:ablation} is regenerated from the completed average-rank results. Only the completed restart-related variants are plotted to avoid showing uncompleted ablation variants as numerical results.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{ablation_bar_tikz_final.pdf}
+    \caption{Average-rank comparison of completed restart-related variants.}
+    \label{fig:ablation}
+\end{figure}
+
+\subsection{Overall Performance}
+Table~\ref{tab:rank_runtime} reports the average rank and runtime of all compared algorithms. Lower average rank indicates better overall performance, and relative runtime is calculated with ARPSO-SRR as the reference method.
+
+\begin{table}[!t]
+\caption{Average Rank and Runtime of Compared Algorithms}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{cccc}
+\toprule
+Algorithm & Avg. rank & Avg. runtime (s) & Rel. runtime to ARPSO-SRR \\
+\midrule
+DE & 1.97 & 89.88 & 1.25 \\
+CLPSO & 3.17 & 77.40 & 1.08 \\
+GA & 4.21 & 85.44 & 1.19 \\
+ARPSO-SRR & 4.31 & 71.82 & 1.00 \\
+ARPSO-EIS & 4.45 & 72.07 & 1.00 \\
+HPSO-TVAC & 5.34 & 72.82 & 1.01 \\
+PSO-RS & 6.07 & 76.21 & 1.06 \\
+PSO & 7.55 & 74.09 & 1.03 \\
+PSO-AW & 7.93 & 75.37 & 1.05 \\
+\bottomrule
+\end{tabular}%
+}
+\label{tab:rank_runtime}
+\end{table}
+
+DE achieves the best average rank, followed by CLPSO and GA. ARPSO-SRR ranks fourth among the nine compared algorithms. This result should be interpreted carefully. ARPSO-SRR is not designed to replace specialized algorithms such as DE or CLPSO. Its main purpose is to provide a lightweight restart-based enhancement for the PSO framework. Compared with standard PSO, PSO-AW, PSO-RS, and HPSO-TVAC, ARPSO-SRR achieves clearly better average ranking. In addition, its average runtime is 71.82 seconds, which is lower than CLPSO, GA, and DE. Therefore, the proposed restart-based resource reallocation mechanism introduces limited computational overhead.
+
+\subsection{Function-group Analysis}
+To further analyze the behavior of the compared algorithms, Table~\ref{tab:group_rank} reports the average rank on different function groups.
+
+
+\begin{table}[!t]
+\caption{Average Rank on Different Function Groups}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+Group & PSO-RS & HPSO & CLPSO & GA & DE & ARPSO-SRR \\
+\midrule
+Unimodal & 5.00 & 6.50 & 2.50 & 6.50 & 1.50 & 3.00 \\
+Simple multimodal & 6.71 & 4.00 & 2.57 & 6.00 & 3.43 & 4.86 \\
+Hybrid & 6.10 & 4.90 & 3.40 & 3.30 & 1.10 & 4.80 \\
+Composition & 5.80 & 6.50 & 3.50 & 3.40 & 1.90 & 3.70 \\
+\bottomrule
+\end{tabular}%
+}
+\label{tab:group_rank}
+\end{table}
+
+ARPSO-SRR performs well on composition functions, where its average rank is 3.70. This suggests that adaptive restart and search resource reallocation are useful when the landscape contains multiple interacting structures. On simple multimodal and hybrid functions, ARPSO-SRR is still weaker than several strong baselines, especially CLPSO and DE, which confirms that the proposed method is a lightweight PSO enhancement rather than a universally dominant optimizer.
+
+\subsection{Convergence and Restart Behavior}
+Representative convergence curves are generated from the recorded mean-curve results. Fig.~\ref{fig:convergence} shows the mean error curves on CEC2017-F23, a representative composition function. ARPSO-SRR continues improving after the early stage and obtains a lower final mean error than PSO and PSO-RS on this function, although DE still achieves the best final error.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{convergence_curve_tikz_final.pdf}
+    \caption{Representative convergence behavior on CEC2017-F23.}
+    \label{fig:convergence}
+\end{figure}
+
+Restart behavior is generated from the recorded restart-detail results. Fig.~\ref{fig:restart_behavior} presents the restart-event frequency of ARPSO-SRR on CEC2017-F23 over 30 runs. Restart events are sparse in the early stage and become concentrated after the swarm has searched for a long period, which is consistent with the intended resource-reallocation behavior. Across the completed 29-function experiment, ARPSO-SRR has an average restart count of 67.72, while PSO-RS has an average restart count of 8.94.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{restart_behavior_tikz_final.pdf}
+    \caption{Restart-event frequency of ARPSO-SRR on CEC2017-F23 over 30 independent runs.}
+    \label{fig:restart_behavior}
+\end{figure}
+
+\subsection{Statistical Analysis}
+The Friedman test is first conducted over the 29 benchmark functions. The test statistic is 117.2414 and the $p$-value is $1.2296\times10^{-21}$, indicating that there are significant differences among the compared algorithms.
+
+\begin{table}[!t]
+\caption{Friedman Test over All Compared Algorithms}
+\centering
+\begin{tabular}{cccc}
+\toprule
+Statistic & $p$-value & Functions & Algorithms \\
+\midrule
+117.2414 & $1.2296\times10^{-21}$ & 29 & 9 \\
+\bottomrule
+\end{tabular}
+\label{tab:friedman}
+\end{table}
+
+Table~\ref{tab:wilcoxon} reports the Wilcoxon signed-rank test summary between ARPSO-SRR and each compared algorithm. ``Win'', ``NSD'', and ``Loss'' denote the numbers of functions where ARPSO-SRR is significantly better, not significantly different, and significantly worse than the compared algorithm, respectively.
+
+\begin{table}[!t]
+\caption{Wilcoxon Signed-rank Test Summary for ARPSO-SRR}
+\centering
+\begin{tabular}{cccc}
+\toprule
+Compared algorithm & Win & NSD & Loss \\
+\midrule
+PSO & 17 & 11 & 1 \\
+PSO-AW & 19 & 10 & 0 \\
+PSO-RS & 17 & 11 & 1 \\
+HPSO-TVAC & 13 & 9 & 7 \\
+GA & 11 & 9 & 9 \\
+ARPSO-EIS & 1 & 27 & 1 \\
+CLPSO & 7 & 6 & 16 \\
+DE & 3 & 3 & 23 \\
+\bottomrule
+\end{tabular}
+\label{tab:wilcoxon}
+\end{table}
+
+The Wilcoxon results show that ARPSO-SRR significantly outperforms PSO, PSO-AW, and PSO-RS on many functions, and obtains more wins than losses against HPSO-TVAC. Against GA, its results are balanced. However, ARPSO-SRR is weaker than CLPSO and DE, which is consistent with the average-rank results in Table~\ref{tab:rank_runtime}. The comparison with ARPSO-EIS gives 1 win, 27 nonsignificant differences, and 1 loss, indicating that the EIS-based selection rule does not provide stable additional improvement.
+
+
+\subsection{Discussion}
+The results indicate that ARPSO-SRR is suitable for improving PSO-family algorithms. Its main advantage is not to beat every strong evolutionary algorithm, but to provide a simple and lightweight mechanism for reducing premature convergence. Compared with PSO, PSO-AW, and PSO-RS, ARPSO-SRR achieves clear improvement, showing that adaptive hybrid restart is more effective than only adjusting inertia weight or using simple random restart. Against CLPSO and DE, ARPSO-SRR is weaker in average rank and statistical comparison, which indicates that specialized learning and differential mutation mechanisms still have strong advantages on many CEC2017 functions. Future work should further refine the restart trigger and restart intensity control.
+
+
+\section{Conclusion}\label{sec:conclusion}
+This paper proposed ARPSO-SRR, an adaptive restart PSO algorithm based on search resource reallocation. The method detects stagnation and diversity loss, adaptively determines restart intensity, and combines global random regeneration with local perturbation around promising regions without increasing the maximum number of function evaluations.
+
+Experiments on 29 CEC2017 benchmark functions show that ARPSO-SRR improves standard PSO and several PSO variants. The Friedman and Wilcoxon tests confirm that ARPSO-SRR performs better than PSO, PSO-AW, and PSO-RS on many functions, while DE and CLPSO remain stronger overall baselines. The comparison with ARPSO-EIS indicates that more complex inefficient-particle identification does not necessarily bring stable additional gains. Future work will investigate more adaptive restart triggers, large-scale optimization, and real-world applications.
+
+\begingroup
+\scriptsize
+\begin{thebibliography}{00}
+\bibitem{b1} J. Kennedy and R. Eberhart, ``Particle swarm optimization,'' in \textit{Proc. IEEE Int. Conf. Neural Networks}, 1995, pp. 1942--1948.
+\bibitem{b2} Y. Shi and R. Eberhart, ``A modified particle swarm optimizer,'' in \textit{Proc. IEEE Int. Conf. Evolutionary Computation}, 1998, pp. 69--73.
+\bibitem{b3} M. Clerc and J. Kennedy, ``The particle swarm-explosion, stability, and convergence in a multidimensional complex space,'' \textit{IEEE Trans. Evol. Comput.}, vol. 6, no. 1, pp. 58--73, 2002.
+\bibitem{b4} J. J. Liang, A. K. Qin, P. N. Suganthan, and S. Baskar, ``Comprehensive learning particle swarm optimizer for global optimization of multimodal functions,'' \textit{IEEE Trans. Evol. Comput.}, vol. 10, no. 3, pp. 281--295, 2006.
+\bibitem{b5} N. H. Awad, M. Z. Ali, P. N. Suganthan, J. J. Liang, and B. Y. Qu, ``Problem definitions and evaluation criteria for the CEC 2017 special session and competition on single objective real-parameter numerical optimization,'' Nanyang Technological University, Singapore, Tech. Rep., 2016.
+\bibitem{b6} J. H. Holland, \textit{Adaptation in Natural and Artificial Systems}. Ann Arbor, MI, USA: University of Michigan Press, 1975.
+\bibitem{b7} R. Storn and K. Price, ``Differential evolution: A simple and efficient heuristic for global optimization over continuous spaces,'' \textit{J. Global Optim.}, vol. 11, no. 4, pp. 341--359, 1997.
+\bibitem{b8} F. Wilcoxon, ``Individual comparisons by ranking methods,'' \textit{Biometrics Bull.}, vol. 1, no. 6, pp. 80--83, 1945.
+\bibitem{b9} M. Friedman, ``The use of ranks to avoid the assumption of normality implicit in the analysis of variance,'' \textit{J. Amer. Stat. Assoc.}, vol. 32, no. 200, pp. 675--701, 1937.
+\bibitem{b10} J. Derrac, S. Garcia, D. Molina, and F. Herrera, ``A practical tutorial on the use of nonparametric statistical tests as a methodology for comparing evolutionary and swarm intelligence algorithms,'' \textit{Swarm Evol. Comput.}, vol. 1, no. 1, pp. 3--18, 2011.
+    \bibitem{b11} A. Ratnaweera, S. K. Halgamuge, and H. C. Watson, ``Self-organizing hierarchical particle swarm optimizer with time-varying acceleration coefficients,'' \textit{IEEE Trans. Evol. Comput.}, vol. 8, no. 3, pp. 240--255, 2004.
+    \bibitem{b12} Z.-H. Zhan, J. Zhang, Y. Li, and H. S.-H. Chung, ``Adaptive particle swarm optimization,'' \textit{IEEE Trans. Syst., Man, Cybern. B, Cybern.}, vol. 39, no. 6, pp. 1362--1381, 2009.
+    \bibitem{b13} J. Gou, Y.-X. Lei, W.-P. Guo, C. Wang, Y. Cai, and W. Luo, ``A novel improved particle swarm optimization algorithm based on individual difference evolution,'' \textit{Appl. Soft Comput.}, vol. 57, pp. 468--481, 2017.
+    \bibitem{b14} L. Liu, S. Yang, and D. Wang, ``A study on particle swarm algorithm based on restart strategy and adaptive dynamic adjustment mechanism,'' \textit{Electronics}, vol. 11, no. 15, Art. no. 2339, 2022.
+\end{thebibliography}
+\endgroup
+
+\end{document}

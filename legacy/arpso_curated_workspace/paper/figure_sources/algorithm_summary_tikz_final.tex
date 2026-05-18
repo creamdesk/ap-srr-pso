@@ -1,0 +1,71 @@
+\documentclass[tikz,border=4pt]{standalone}
+\usepackage{amsmath}
+\usepackage{times}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric,calc,fit}
+\begin{document}
+\begin{tikzpicture}[
+    font=\footnotesize,
+    >=Latex,
+    block/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=blue!45!black,
+        fill=blue!5,
+        line width=0.55pt,
+        minimum width=33mm,
+        minimum height=8mm,
+        align=center,
+        inner xsep=4pt,
+        inner ysep=3pt
+    },
+    restart/.style={
+        rectangle,
+        rounded corners=2pt,
+        draw=green!45!black,
+        fill=green!8,
+        line width=0.65pt,
+        minimum width=37mm,
+        minimum height=9mm,
+        align=center,
+        inner xsep=4pt,
+        inner ysep=3pt
+    },
+    decision/.style={
+        diamond,
+        aspect=2.1,
+        draw=orange!65!black,
+        fill=orange!9,
+        line width=0.55pt,
+        minimum width=28mm,
+        minimum height=11mm,
+        align=center,
+        inner sep=1pt
+    },
+    arrow/.style={->, line width=0.6pt, draw=gray!75!black},
+    greenarrow/.style={->, line width=0.7pt, draw=green!45!black},
+    label/.style={font=\scriptsize, inner sep=1pt}
+]
+
+\node[block] (input) at (0,0) {\textbf{Input and initialization}\\$\mathbf{x}_i,\mathbf{v}_i,\mathbf{p}_i,\mathbf{g}$};
+\node[block, below=8mm of input] (update) {\textbf{PSO update}\\velocity, position, fitness};
+\node[block, below=8mm of update] (monitor) {\textbf{State monitoring}\\diversity $D^t$ and stagnation $s^t$};
+\node[decision, below=9mm of monitor] (condition) {Restart\\condition?};
+\node[restart, right=18mm of condition] (restart) {\textbf{Restart module}\\compute $\rho^t$, $m^t$\\global + local restart};
+\node[block, below=9mm of condition] (continue) {\textbf{Continue search}\\update swarm state};
+\node[decision, below=9mm of continue] (terminal) {Termination\\criterion?};
+\node[block, right=18mm of terminal] (output) {\textbf{Output}\\best solution $\mathbf{g}$};
+
+\draw[arrow] (input) -- (update);
+\draw[arrow] (update) -- (monitor);
+\draw[arrow] (monitor) -- (condition);
+\draw[arrow] (condition) -- node[label,right,text=gray!70!black] {No} (continue);
+\draw[arrow] (continue) -- (terminal);
+\draw[greenarrow] (condition.east) -- node[label,above,text=green!45!black] {Yes} (restart.west);
+\draw[greenarrow,dashed] (restart.south) |- ($(continue.east)+(0,1.5mm)$);
+\draw[greenarrow] (terminal.east) -- node[label,above,text=green!45!black] {Yes} (output.west);
+\draw[arrow,dashed] (terminal.west) -- ++(-12mm,0) node[label,below,text=gray!70!black] {No} |- (update.west);
+
+
+
+\end{tikzpicture}
+\end{document}

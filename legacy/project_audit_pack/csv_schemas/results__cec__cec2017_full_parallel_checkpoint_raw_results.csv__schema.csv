@@ -1,0 +1,9 @@
+﻿column,dtype_from_head,non_null_in_head,example
+ExperimentMode,object,50,full
+Function,object,50,CEC2017-F1
+Algorithm,object,50,PSO
+Run,int64,50,1
+BestValue,float64,50,652231053.2002276
+RestartCount,int64,50,0
+RuntimeSeconds,float64,50,3.512455299998692
+Seed,int64,50,1685010769

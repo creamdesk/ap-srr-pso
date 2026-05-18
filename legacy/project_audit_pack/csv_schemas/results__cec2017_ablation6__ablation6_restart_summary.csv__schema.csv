@@ -1,0 +1,5 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,6,PSO-RS
+AvgRestartCount,float64,6,1324.857142857143
+StdRestartCount,float64,6,341.991616304171
+AvgRestartedParticles,float64,6,8633.578571428572

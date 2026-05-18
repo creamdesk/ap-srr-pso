@@ -1,0 +1,7 @@
+﻿tex_file,asset_type,asset,resolved,exists,note
+论文\main.tex,includegraphics,#2,,False,
+论文\main.tex,includegraphics,figures/#2,,False,
+论文\main.tex,includegraphics,../figures/#2,,False,
+arpso_real_data_updated_latex_pack\main_ei_arpso_srr_real_data.tex,includegraphics,#2,,False,
+arpso_real_data_updated_latex_pack\main_ei_arpso_srr_real_data.tex,includegraphics,figures/#2,,False,
+arpso_real_data_updated_latex_pack\main_ei_arpso_srr_real_data.tex,includegraphics,../figures/#2,,False,

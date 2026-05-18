@@ -1,0 +1,21 @@
+\begin{table}[!t]
+\caption{Six-Variant Ablation Results on the Completed Ablation Functions}
+\centering
+\scriptsize
+\setlength{\tabcolsep}{2.4pt}
+\resizebox{\columnwidth}{!}{%
+\begin{tabular}{lcccc}
+\toprule
+Algorithm & Avg. rank & Avg. restarts & Rest. particles & Runtime (s) \\
+\midrule
+ARPSO-Local  & 2.71 & 3561.7 & 33812.2 & 118.24 \\
+ARPSO-SRR    & 2.71 & 2229.8 & 14847.4 & 118.42 \\
+ARPSO-EIS    & 3.46 & 2048.1 & 13273.5 & 119.40 \\
+ARPSO-Fixed  & 3.46 & 1626.6 & 16265.6 & 116.87 \\
+ARPSO-Global & 4.25 & 1538.4 & 10613.0 & 116.63 \\
+PSO-RS       & 4.39 & 1324.9 & 8633.6  & 116.13 \\
+\bottomrule
+\end{tabular}%
+}
+\label{tab:ablation}
+\end{table}

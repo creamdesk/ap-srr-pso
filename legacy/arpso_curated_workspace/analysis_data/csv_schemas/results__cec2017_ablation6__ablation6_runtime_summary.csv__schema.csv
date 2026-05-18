@@ -1,0 +1,6 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,6,PSO-RS
+AvgRuntime,float64,6,116.12800739294006
+StdRuntime,float64,6,123.1832113061522
+AvgFEs,float64,6,300000.0
+RelativeRuntimeToSRR,float64,6,0.9806050684641868

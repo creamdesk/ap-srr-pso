@@ -1,0 +1,32 @@
+\subsection{Ablation Study}
+Table~\ref{tab:ablation} reports the restart-related variants for which complete results are currently available. The rows of ARPSO-Fixed, ARPSO-Global, and ARPSO-Local are reserved for the six-variant ablation study and are left blank in this draft to avoid reporting unverified values.
+
+\begin{table}[!t]
+\caption{Ablation Results of Restart-related Variants}
+\centering
+\begin{tabular}{lccc}
+\toprule
+Algorithm & Avg. rank & Avg. restarts & Avg. runtime (s) \\
+\midrule
+PSO-RS & 6.07 & 8.94 & 76.21 \\
+ARPSO-Fixed & -- & -- & -- \\
+ARPSO-Global & -- & -- & -- \\
+ARPSO-Local & -- & -- & -- \\
+ARPSO-SRR & 4.31 & 67.72 & 71.82 \\
+ARPSO-EIS & 4.45 & 66.55 & 72.07 \\
+\bottomrule
+\end{tabular}
+\label{tab:ablation}
+\end{table}
+
+The completed restart-related results show that ARPSO-SRR obtains a better average rank than PSO-RS and is slightly better than ARPSO-EIS. The result indicates that the adaptive hybrid restart framework is more effective than a simple random restart strategy. The comparison with ARPSO-EIS also indicates that the more complex inefficient-particle identification rule does not provide stable additional improvement in the completed experiment.
+
+Fig.~\ref{fig:ablation} is regenerated from the completed average-rank results. Only the completed restart-related variants are plotted to avoid showing uncompleted ablation variants as numerical results.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{ablation_bar_tikz_final.pdf}
+    \caption{Average-rank comparison of completed restart-related variants.}
+    \label{fig:ablation}
+\end{figure}
+

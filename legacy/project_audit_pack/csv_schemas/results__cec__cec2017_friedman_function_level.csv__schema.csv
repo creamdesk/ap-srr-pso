@@ -1,0 +1,6 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Test,object,1,Friedman
+Statistic,float64,1,117.24137931034475
+PValue,float64,1,1.2296122050482198e-21
+NumBlocks,int64,1,29
+NumAlgorithms,int64,1,9

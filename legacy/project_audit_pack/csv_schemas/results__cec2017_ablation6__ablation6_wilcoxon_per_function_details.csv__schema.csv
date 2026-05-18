@@ -1,0 +1,9 @@
+﻿column,dtype_from_head,non_null_in_head,example
+FunctionID,int64,50,1
+Function,object,50,F1
+BaseAlgorithm,object,50,ARPSO-SRR
+ComparedAlgorithm,object,50,PSO-RS
+BaseMeanError,float64,50,9001.842466992277
+ComparedMeanError,float64,50,8069684.897158904
+PValue,float64,50,0.9838335812091829
+Result,object,50,NSD

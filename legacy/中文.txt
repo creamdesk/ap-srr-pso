@@ -1,0 +1,410 @@
+\documentclass[10pt,twocolumn]{ctexart}
+
+% ============================================================
+% IEEE-like Chinese conference paper template
+% Compile with: XeLaTeX -> BibTeX -> XeLaTeX -> XeLaTeX
+% ============================================================
+
+\usepackage[a4paper,left=1.65cm,right=1.65cm,top=1.85cm,bottom=2.0cm,columnsep=0.62cm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{xcolor}
+% \usepackage{balance}
+\usepackage[section]{placeins}
+\usepackage{dblfloatfix}
+\usepackage[hidelinks]{hyperref}
+\usepackage{enumitem}
+
+% ============================================================
+% Formatting
+% ============================================================
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\linespread{1.03}
+
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period
+}
+
+\graphicspath{{paper_figures/}{figures/}}
+
+\newcommand{\alg}[1]{\textsc{#1}}
+\newcommand{\etal}{\emph{et al.}}
+\newcommand{\argmin}{\mathop{\mathrm{arg\,min}}}
+
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+
+% ============================================================
+% Title information
+% ============================================================
+
+\title{\heiti{}基于低效粒子识别的自适应重启粒子群优化算法}
+
+\author{
+Chenshuo Cai\\
+Xinyang Normal University\\
+\url{cai_chenshuo@qq.com}
+\and
+Zhongyang Chen\thanks{Corresponding author: Zhongyang Chen, \url{czy112@xynu.edu.cn}}\\
+Xinyang Normal University\\
+\url{czy112@xynu.edu.cn}
+}
+
+\date{April 26, 2026}
+\begin{document}
+
+\maketitle
+% ============================================================
+% Abstract
+% ============================================================
+
+\begin{abstract}
+粒子群优化算法（Particle Swarm Optimization, \alg{PSO}）因结构简单、参数较少、实现方便等特点，被广泛用于连续优化和工程参数寻优问题。然而，在复杂多峰函数或病态搜索空间中，标准 \alg{PSO} 容易出现粒子快速聚集、种群多样性下降以及后期搜索停滞等问题。重启机制是缓解早熟收敛的一类常用策略，但已有重启型粒子群算法通常直接选择适应度较差的粒子进行重启，重启对象选择依据较单一，难以准确刻画粒子在搜索过程中的实际价值。针对该问题，本文提出一种基于低效粒子识别的自适应重启粒子群优化算法（Adaptive Restart Particle Swarm Optimization with Inefficient-particle Selection, \alg{ARPSO-EIS}）。该算法在自适应惯性权重和多样性反馈重启框架的基础上，引入低效粒子识别机制，从适应度劣势、空间拥挤程度和历史贡献度三个方面综合评价粒子的搜索价值，并优先选择低效粒子执行混合重启操作。实验在六个经典连续优化测试函数上进行，并与 \alg{PSO}、\alg{PSO-AW}、\alg{PSO-RS}、\alg{ARPSO-v4}、\alg{GA} 和 \alg{DE} 进行比较。结果表明，\alg{ARPSO-EIS} 相比标准 \alg{PSO}、普通重启 \alg{PSO-RS} 和 \alg{GA} 具有明显性能优势；与 \alg{ARPSO-v4} 和 \alg{PSO-AW} 相比，统计差异不显著，但能够保持相近的综合性能，并使重启对象选择过程具有更明确的机制解释。
+\end{abstract}
+
+\noindent\textbf{关键词：} 粒子群优化；自适应重启；低效粒子识别；种群多样性；连续优化
+
+
+% ============================================================
+\section{引言}
+% ============================================================
+
+粒子群优化算法（Particle Swarm Optimization, \alg{PSO}）由 Kennedy 和 Eberhart 提出，其基本思想来源于鸟群觅食和群体协同行为~\cite{kennedy1995particle}。与依赖梯度信息的传统优化方法不同，\alg{PSO} 通过多个粒子在搜索空间中的协同移动实现寻优，因此对目标函数的连续性、可导性和凸性要求较低。由于其结构简洁、参数较少、易于实现，\alg{PSO} 已被广泛应用于函数优化、工程设计、调度优化、特征选择和神经网络参数调整等问题中 \cite{poli2007overview,bonyadi2017particle,gad2022pso}。
+
+标准 \alg{PSO} 的搜索过程主要由个体经验和群体经验共同驱动。粒子一方面向自身历史最优位置靠近，另一方面向全局最优位置靠近。这种机制使得 \alg{PSO} 在搜索早期能够较快形成有效搜索方向，并在较少参数设置下取得可接受的优化结果。然而，该机制也带来一个典型问题：当全局最优位置落入局部最优区域时，其他粒子会逐渐向该区域聚集，种群多样性下降，搜索范围不断收缩。若此时缺乏有效的多样性恢复机制，算法容易进入长时间停滞状态。
+
+围绕上述问题，已有研究从多个方向改进 \alg{PSO}。惯性权重策略通过调节历史速度对当前运动的影响，改善算法在全局探索和局部开发之间的平衡 \cite{shi1998modified}。收缩因子模型从稳定性角度分析粒子轨迹，为参数选择提供了理论依据 \cite{clerc2002particle,trelea2003particle,vandenbergh2006study}。此外，也有研究将 \alg{PSO} 与变异、局部搜索、差分进化、遗传算子和重启策略结合，以提高算法跳出局部最优的能力。
+
+在这些改进方向中，重启机制是一类直观且有效的早熟收敛缓解方法。其基本思想是：当算法检测到搜索停滞或种群多样性过低时，重新初始化部分粒子，使种群重新获得探索新区域的能力。重启策略的关键包括两个方面：一是何时触发重启，二是选择哪些粒子进行重启。前者通常通过停滞代数或种群多样性判断；后者则常采用适应度排序，即选择当前表现较差的粒子进行重启。
+
+然而，仅依据适应度选择重启对象存在一定局限。首先，适应度较差的粒子并不一定完全没有搜索价值。某些粒子虽然当前适应度不佳，但可能位于尚未充分探索的区域，对保持种群分布具有一定意义。其次，部分粒子虽然并非适应度最差，但长期聚集在种群中心或全局最优附近，且很少更新个体历史最优位置，这类粒子对搜索空间的进一步探索贡献较低。若重启机制不能识别这类“冗余粒子”，则可能无法充分发挥重启操作恢复搜索活性的作用。
+
+基于上述观察，本文提出一种基于低效粒子识别的自适应重启粒子群优化算法（\alg{ARPSO-EIS}）。该方法并不改变标准 \alg{PSO} 的基本更新框架，而是在自适应重启阶段改进重启对象选择方式。具体而言，本文从三个角度刻画粒子的低效程度：适应度劣势用于描述粒子当前搜索结果的相对落后程度，空间拥挤程度用于描述粒子在种群分布中的冗余性，历史贡献度用于衡量粒子近期是否产生有效搜索改进。通过综合这三类信息，\alg{ARPSO-EIS} 能够优先重启搜索价值较低的粒子，而不是简单地重启适应度最差的粒子。
+
+本文的主要贡献包括以下三个方面：
+
+\begin{enumerate}[label=\arabic*., leftmargin=2em, itemsep=0pt, topsep=2pt, parsep=0pt, partopsep=0pt]
+  \item 提出一种基于低效粒子识别的自适应重启 \alg{PSO} 方法。该方法保留 \alg{PSO} 的基本搜索框架，仅在重启对象选择阶段引入搜索价值评估机制，具有较低实现复杂度。
+  \item 构建一种由适应度劣势、空间拥挤程度和历史贡献度组成的低效粒子评分函数，用于识别搜索冗余度较高、历史贡献较低的粒子，提高重启对象选择的针对性。
+  \item 在六个经典连续优化测试函数上进行 30 次独立实验，并结合均值、标准差、平均排名、收敛曲线、箱线图、重启行为分析和非参数统计检验对算法性能进行评价。
+\end{enumerate}
+
+本文其余部分安排如下：第二节介绍相关工作和基础方法；第三节给出 \alg{ARPSO-EIS} 的具体设计；第四节说明实验设置；第五节分析实验结果；第六节总结全文并讨论后续研究方向。
+
+% ============================================================
+\section{相关工作}
+% ============================================================
+
+\subsection{标准粒子群优化算法}
+
+设第 $t$ 代第 $i$ 个粒子的位置和速度分别为 $\bm{x}_i^t$ 和 $\bm{v}_i^t$，个体历史最优位置为 $\bm{p}_i^t$，全局最优位置为 $\bm{g}^t$。标准 \alg{PSO} 的速度更新和位置更新公式为
+\begin{equation}
+\bm{v}_i^{t+1}
+=
+w\bm{v}_i^t
++
+c_1 r_1(\bm{p}_i^t-\bm{x}_i^t)
++
+c_2 r_2(\bm{g}^t-\bm{x}_i^t),
+\end{equation}
+\begin{equation}
+\bm{x}_i^{t+1}=\bm{x}_i^t+\bm{v}_i^{t+1},
+\end{equation}
+其中，$w$ 为惯性权重，$c_1$ 和 $c_2$ 分别为认知学习因子和社会学习因子，$r_1$ 和 $r_2$ 为 $[0,1]$ 上的随机数。
+
+从搜索行为角度看，$c_1 r_1(\bm{p}_i^t-\bm{x}_i^t)$ 体现粒子对自身历史经验的利用，$c_2 r_2(\bm{g}^t-\bm{x}_i^t)$ 体现粒子对群体最优经验的学习。当全局最优位置可靠时，该机制有助于粒子快速收敛；但当全局最优位置处于局部最优区域时，粒子群可能过早向局部区域聚集，导致后续搜索空间严重收缩。
+
+\subsection{自适应惯性权重策略}
+
+惯性权重控制粒子对历史速度的继承程度，是影响 \alg{PSO} 搜索行为的重要参数。较大的惯性权重有利于粒子保持较大运动幅度，从而增强全局探索能力；较小的惯性权重有利于粒子细化局部搜索，从而提高收敛精度。固定惯性权重难以同时满足搜索早期和后期的不同需求，因此自适应惯性权重被广泛用于改进 \alg{PSO}。
+
+本文采用非线性递减惯性权重：
+\begin{equation}
+w(t)=w_{\min}+(w_{\max}-w_{\min})\left(1-\frac{t}{T}\right)^{1.5},
+\end{equation}
+其中，$T$ 为最大迭代次数，$w_{\max}$ 和 $w_{\min}$ 分别表示惯性权重上界和下界。该形式使算法在搜索早期保持较高惯性权重，在搜索后期逐步降低惯性权重，以便从较大范围探索逐渐过渡到局部开发。
+
+\subsection{重启型粒子群优化}
+
+重启机制通过重新初始化部分粒子来恢复种群多样性，是缓解早熟收敛的一类常用方法。与完全重新初始化整个种群不同，局部重启通常只调整部分粒子，从而在恢复探索能力的同时保留已有优秀搜索信息。重启策略的效果取决于三个问题：触发条件、重启比例和重启对象选择。
+
+已有方法通常根据全局最优长时间未改善或种群多样性过低触发重启，并选择适应度较差的粒子进行重启。这种方法实现简单，但其粒子选择依据较为单一。适应度反映的是粒子当前搜索结果，却不能完整反映粒子的空间分布价值和历史贡献。因此，本文将重启对象选择从“适应度差”扩展为“搜索价值低”，以期在不显著增加重启次数的前提下提高重启操作的有效性。
+
+% ============================================================
+\section{所提算法}
+% ============================================================
+
+\subsection{总体框架}
+
+本文提出的 \alg{ARPSO-EIS} 以自适应惯性权重 \alg{PSO} 为基础，并在搜索后期引入基于种群多样性的重启机制。当粒子群出现明显停滞或多样性不足时，算法不再简单选择适应度最差的粒子，而是通过低效粒子评分函数识别更适合重启的粒子。整体流程由以下三个部分组成：
+
+\begin{enumerate}[label=\arabic*., leftmargin=2em, itemsep=0pt, topsep=2pt, parsep=0pt, partopsep=0pt]
+  \item 使用非线性自适应惯性权重调节搜索进程，使算法早期偏向探索、后期偏向开发；
+  \item 使用种群多样性和停滞窗口判断是否触发重启，以避免在正常收敛过程中频繁扰动粒子群；
+  \item 使用低效粒子识别机制选择重启对象，从适应度、空间位置和历史贡献三个角度综合判断粒子搜索价值。
+\end{enumerate}
+
+该设计的核心思想是：重启不应仅被视为随机扰动操作，而应被视为一种有限资源。由于每次重启都会改变种群结构，因此应优先作用于那些对当前搜索贡献较低、空间位置较冗余的粒子。
+
+\subsection{种群多样性度量}
+
+为判断粒子群是否出现过度聚集，本文采用归一化种群多样性指标。设第 $t$ 代粒子位置矩阵为 $X^t=[\bm{x}_1^t,\bm{x}_2^t,\ldots,\bm{x}_N^t]^\top$，种群中心为
+\begin{equation}
+\bar{\bm{x}}^t=\frac{1}{N}\sum_{i=1}^{N}\bm{x}_i^t,
+\end{equation}
+其中，$N$ 为种群规模。种群多样性定义为
+\begin{equation}
+D(t)=
+\frac{1}{N\sqrt{d}(ub-lb)}
+\sum_{i=1}^{N}
+\left\|\bm{x}_i^t-\bar{\bm{x}}^t\right\|_2,
+\end{equation}
+其中，$d$ 为问题维度，$lb$ 和 $ub$ 分别为搜索空间下界和上界。该指标通过搜索范围和维度进行归一化，便于在不同函数之间进行比较。当 $D(t)$ 较小时，说明粒子分布较集中，种群探索能力下降；当 $D(t)$ 较大时，说明粒子分布较分散，算法仍保持一定搜索范围。
+
+\subsection{自适应重启触发机制}
+
+本文同时考虑种群多样性和全局最优改进情况来触发重启。当多样性低于阈值并持续若干代，或全局最优值在停滞窗口内没有产生足够改善时，算法认为搜索过程可能进入停滞状态。
+
+多样性触发条件为
+\begin{equation}
+D(t)<D_{\mathrm{th}},
+\end{equation}
+其中，$D_{\mathrm{th}}$ 为多样性阈值。停滞触发条件为
+\begin{equation}
+f(\bm{g}^{t-s})-f(\bm{g}^{t})<\varepsilon,
+\end{equation}
+其中，$s$ 为停滞窗口长度，$\varepsilon$ 为最小改进阈值。
+
+触发重启后，重启比例由多样性不足程度和停滞严重程度共同决定：
+\begin{equation}
+\begin{aligned}
+\rho(t)
+&=
+\max\left(\Delta_D(t),\frac{1}{2}\Delta_S(t)\right),\\
+\alpha(t)
+&=
+\alpha_{\min}
++
+(\alpha_{\max}-\alpha_{\min})\rho(t).
+\end{aligned}
+\end{equation}
+其中，$\alpha_{\min}$ 和 $\alpha_{\max}$ 分别表示最小和最大重启比例，$\rho(t)$ 表示由多样性不足程度和停滞严重程度共同决定的重启强度系数。$\Delta_D(t)$ 描述当前多样性低于阈值的程度，$\Delta_S(t)$ 描述当前搜索停滞的严重程度。该设计使得重启强度能够随搜索退化程度变化，而不是固定重启相同比例的粒子。
+
+\subsection{低效粒子识别机制}
+
+\alg{ARPSO-EIS} 的主要改进集中在重启对象选择阶段。传统 \alg{ARPSO-v4} 选择适应度最差的一批粒子进行重启。该方式虽然能够清除部分表现较差的粒子，但未考虑粒子的空间冗余和历史搜索贡献。本文将粒子的低效程度定义为三类信息的加权组合：
+\begin{equation}
+E_i=\lambda_1 R_i+\lambda_2 C_i+\lambda_3 U_i,
+\end{equation}
+其中，$E_i$ 表示第 $i$ 个粒子的低效分数，$R_i$ 为适应度劣势分数，$C_i$ 为空间拥挤分数，$U_i$ 为低贡献分数。本文设置 $\lambda_1=0.50$，$\lambda_2=0.30$，$\lambda_3=0.20$，使适应度仍然保持主导作用，同时引入空间分布和历史贡献信息。
+
+适应度劣势分数 $R_i$ 由粒子的适应度排名归一化得到。对于最小化问题，适应度越差，$R_i$ 越大。该指标反映粒子当前搜索结果是否落后。
+
+空间拥挤分数 $C_i$ 用于描述粒子位置是否具有冗余性。设粒子到种群中心的距离为
+\begin{equation}
+d_i=\|\bm{x}_i-\bar{\bm{x}}\|_2.
+\end{equation}
+则空间拥挤分数定义为
+\begin{equation}
+C_i = 1 - \frac{d_i-d_{\min}}{d_{\max}-d_{\min}+\delta},
+\end{equation}
+其中，$d_{\min}$ 和 $d_{\max}$ 分别为所有粒子到种群中心距离的最小值和最大值，$\delta$ 为防止分母为零的小常数。粒子越靠近种群中心，$C_i$ 越大，说明其空间位置越容易与其他粒子重叠，搜索冗余度越高。
+
+历史贡献度用于记录粒子近期是否产生有效改进。若粒子成功更新自身个体历史最优位置，则其贡献度增加；同时，贡献度随迭代进行轻微衰减，以突出近期搜索贡献。低贡献分数 $U_i$ 由贡献度归一化后取反得到。贡献越低，$U_i$ 越大。
+
+通过上述设计，\alg{ARPSO-EIS} 选择的重启粒子不仅当前适应度相对落后，而且往往具有较高空间冗余和较低历史贡献。这样可以避免单纯依赖适应度排序导致的重启对象选择粗糙问题。
+
+\subsection{混合重启策略}
+
+在确定重启对象后，本文采用混合重启策略。被选中的粒子被分为两类：少量粒子执行全局随机重启，用于探索新的搜索区域；多数粒子围绕当前全局最优位置进行局部扰动，用于在已有优良区域附近继续开发。局部扰动尺度定义为
+\begin{equation}
+\begin{aligned}
+\eta(t)
+&=
+\sigma_{\max}
+\left(1-\frac{t}{T}\right)
+\left(0.5+\Delta_D(t)\right),\\
+\sigma(t)
+&=(ub-lb)\max\left(\sigma_{\min},\eta(t)\right).
+\end{aligned}
+\end{equation}
+随着迭代进行，$\sigma(t)$ 逐渐减小，使算法后期避免过强扰动。同时，当多样性不足程度较高时，扰动尺度适当增大，以增强恢复搜索活性的能力。
+
+\subsection{算法流程}
+
+\begin{algorithm}[H]
+\caption{ARPSO-EIS}
+\label{alg:arpso_eis}
+\begin{algorithmic}[1]
+\Require Objective function $f(\bm{x})$, population size $N$, dimension $d$, maximum iterations $T$
+\Ensure Best solution $\bm{g}$ and best fitness $f(\bm{g})$
+\State Initialize particle positions and velocities
+\State Initialize personal best positions and global best position
+\State Initialize historical contribution values of particles
+\For{$t=1$ to $T$}
+    \State Update inertia weight $w(t)$
+    \State Update particle velocities and positions
+    \State Evaluate particle fitness values
+    \State Update personal bests, global best, and contribution values
+    \State Compute population diversity $D(t)$
+    \If{restart condition is satisfied}
+        \State Compute fitness-disadvantage score $R_i$
+        \State Compute spatial-crowding score $C_i$
+        \State Compute low-contribution score $U_i$
+        \State Compute inefficiency score $E_i$
+        \State Select particles with the largest $E_i$ as restart candidates
+        \State Apply hybrid global-local restart strategy
+    \EndIf
+\EndFor
+\State \Return $\bm{g}$ and $f(\bm{g})$
+\end{algorithmic}
+\end{algorithm}
+
+% ============================================================
+\section{实验设置}
+% ============================================================
+
+\subsection{测试函数}
+
+本文选取六个经典连续优化测试函数，包括 Sphere、Rastrigin、Rosenbrock、Ackley、Griewank 和 Schwefel。上述函数覆盖了单峰、多峰、非分离、病态窄谷以及欺骗性搜索等不同特征，能够较全面地考察算法在不同搜索景观下的表现 \cite{rastrigin1974systems,rosenbrock1960automatic,ackley1987connectionist,yao1999evolutionary,jamil2013literature,liang2013cec2014}。测试函数信息如 Table~\ref{tab:benchmark_functions} 所示。
+
+\input{paper_tables/table1_benchmark_functions.tex}
+
+\subsection{对比算法与参数设置}
+
+实验选取七种算法进行比较：标准粒子群优化算法 \alg{PSO}、自适应惯性权重粒子群算法 \alg{PSO-AW}、普通重启粒子群算法 \alg{PSO-RS}、基础自适应重启粒子群算法 \alg{ARPSO-v4}、本文提出的 \alg{ARPSO-EIS}、遗传算法 \alg{GA} 和差分进化算法 \alg{DE}。其中，\alg{ARPSO-v4} 可视为本文方法的消融版本，其与 \alg{ARPSO-EIS} 的主要区别在于重启对象选择方式；\alg{GA} 和 \alg{DE} 则作为经典进化算法基线 \cite{holland1975adaptation,goldberg1989genetic,storn1997differential}。
+
+为保证实验比较的一致性，所有算法均采用相同的问题维度、种群规模和最大迭代次数。每种算法在每个测试函数上独立运行 30 次。实验记录每次运行的最终最优适应度值，并进一步计算均值、标准差、最优值、最差值、中位数和平均排名。具体参数设置如 Table~\ref{tab:parameter_settings} 所示。
+
+\input{paper_tables/table2_parameter_settings.tex}
+
+\subsection{评价指标}
+
+由于群体智能优化算法具有随机性，单次运行结果不足以反映算法稳定性。因此，本文采用 30 次独立运行的统计结果作为主要评价依据。均值用于衡量平均优化能力，标准差用于反映稳定性，平均排名用于比较算法在不同函数上的综合表现。收敛曲线用于观察搜索过程，箱线图用于展示最终结果分布，重启次数和低效分数用于分析重启机制本身的行为。
+
+此外，本文采用 Friedman 检验分析多算法整体差异，并以 \alg{ARPSO-EIS} 为基准进行 Wilcoxon 符号秩检验，以进一步判断算法之间的统计差异 \cite{wilcoxon1945individual,friedman1937use,demsar2006statistical,derrac2011practical}。
+
+% ============================================================
+\section{实验结果与分析}
+% ============================================================
+
+\subsection{主结果分析}
+
+Table~\ref{tab:main_results} 给出了各算法在六个测试函数上的均值和标准差，其中最佳结果以粗体标出，次优结果以下划线标出。从整体结果看，标准 \alg{PSO} 和普通重启 \alg{PSO-RS} 在多数函数上的表现相对较弱，说明仅依赖标准速度更新或简单停滞重启难以充分缓解复杂函数上的搜索停滞问题。\alg{PSO-AW} 通过自适应惯性权重改善了搜索过程，因此在部分函数上取得较好结果。
+
+\input{paper_tables/table3_main_results.tex}
+
+\alg{ARPSO-v4} 和 \alg{ARPSO-EIS} 均属于自适应重启型 \alg{PSO}。二者相比标准 \alg{PSO} 和 \alg{PSO-RS} 表现明显更稳定，说明将种群多样性引入重启触发条件是有效的。进一步比较 \alg{ARPSO-v4} 与 \alg{ARPSO-EIS} 可以发现，\alg{ARPSO-EIS} 并未在所有函数上取得更优结果，但在部分复杂函数上表现出一定改善。这与本文算法设计目标一致：\alg{ARPSO-EIS} 的重点不是单纯增加重启强度，而是在相近重启频率下提高重启对象选择的针对性。
+
+需要注意的是，\alg{DE} 在部分函数上具有较强表现，尤其在某些连续优化问题上收敛速度和最终精度较优。这表明 \alg{ARPSO-EIS} 并非在所有优化景观上都占据优势。本文更关注的是在 \alg{PSO} 框架内部，通过较小机制改动提高重启策略的合理性和可解释性。
+
+\subsection{收敛曲线分析}
+
+Figure~\ref{fig:convergence_curves} 展示了四个代表性测试函数上的平均收敛曲线。收敛曲线反映算法从初始搜索到后期收敛的动态过程。对于 Sphere 等相对简单的单峰函数，多数算法均能够持续降低目标函数值，但收敛速度和最终精度存在差异。对于 Rastrigin、Ackley 和 Schwefel 等复杂函数，算法更容易受到局部极值或复杂搜索景观影响，后期搜索能力差异更加明显。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.96\textwidth]{paper_figures/figure1_convergence_curves.pdf}
+\caption{Convergence curves on representative benchmark functions.}
+\label{fig:convergence_curves}
+\end{figure*}
+
+从曲线趋势看，标准 \alg{PSO} 在部分函数上较早进入缓慢下降阶段，说明粒子群可能已经聚集到有限区域。\alg{PSO-AW} 由于采用自适应惯性权重，后期收敛行为有所改善。\alg{ARPSO-v4} 和 \alg{ARPSO-EIS} 通过重启机制恢复部分搜索活性，在复杂函数上具有更强的后期搜索能力。相较于 \alg{ARPSO-v4}，\alg{ARPSO-EIS} 的主要区别体现在重启对象选择层面，因此其收敛曲线并不必然全面领先，但能够在部分函数上保持相近或更优的搜索趋势。
+
+\subsection{稳定性分析}
+
+Figure~\ref{fig:boxplots} 展示了 Rastrigin 和 Schwefel 两个困难函数上的最终结果箱线图。与均值相比，箱线图能够更直观地反映算法多次运行结果的离散程度。箱体越窄，说明算法结果越集中；中位数越低，说明算法典型运行表现越好。
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure2_boxplots.pdf}
+\caption{Boxplots of final objective values on difficult benchmark functions.}
+\label{fig:boxplots}
+\end{figure}
+
+从箱线图可以观察到，不同算法在困难函数上的稳定性存在明显差异。部分算法虽然在个别运行中能够取得较好结果，但结果分布较分散，说明其对初始种群和随机扰动较敏感。\alg{ARPSO-EIS} 在困难函数上保持了相对稳定的结果分布，说明低效粒子识别机制没有引入明显额外波动。该现象也表明，\alg{ARPSO-EIS} 的改进并非通过过强随机扰动获得，而是在较温和的重启框架内调整重启对象选择。
+
+\subsection{平均排名分析}
+
+Table~\ref{tab:average_rank} 和 Figure~\ref{fig:average_rank} 给出了各算法的平均排名。平均排名越小，说明算法在不同测试函数上的综合表现越好。与单个函数结果相比，平均排名能够降低函数尺度差异对整体判断的影响。
+
+\input{paper_tables/table4_average_rank.tex}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure3_average_rank.pdf}
+\caption{Average rank comparison of different algorithms.}
+\label{fig:average_rank}
+\end{figure}
+
+从平均排名结果看，\alg{ARPSO-v4}、\alg{ARPSO-EIS}、\alg{PSO-AW} 和 \alg{DE} 构成第一梯队，而标准 \alg{PSO}、\alg{PSO-RS} 和 \alg{GA} 的综合排名相对靠后。该结果说明，自适应参数调整和更合理的搜索状态干预对于提升 \alg{PSO} 性能具有实际意义。虽然 \alg{ARPSO-EIS} 与 \alg{ARPSO-v4} 的平均排名差异较小，但 \alg{ARPSO-EIS} 在机制上提供了更细粒度的重启对象选择依据，这一点将在后续重启机制分析中进一步体现。
+
+\subsection{统计显著性分析}
+
+为进一步验证不同算法之间的性能差异，本文采用 Friedman 检验对所有算法进行整体比较，结果如 Table~\ref{tab:friedman_test} 所示。Friedman 检验结果表明，各算法之间存在显著差异，说明不同算法在测试函数上的性能表现并非随机波动造成。
+
+\input{paper_tables/table5_friedman_test.tex}
+
+进一步地，本文以 \alg{ARPSO-EIS} 为基准算法，采用 Wilcoxon 符号秩检验与其他算法进行两两比较，结果如 Table~\ref{tab:wilcoxon_summary} 所示。结果显示，\alg{ARPSO-EIS} 相比标准 \alg{PSO}、普通重启 \alg{PSO-RS} 和 \alg{GA} 具有显著优势；与 \alg{ARPSO-v4} 和 \alg{PSO-AW} 相比，统计差异不显著；与 \alg{DE} 相比，\alg{ARPSO-EIS} 在部分函数上取得优势，但在部分函数上仍存在差距。
+
+\input{paper_tables/table6_wilcoxon_summary.tex}
+
+该统计结果说明，\alg{ARPSO-EIS} 的改进不应被理解为对所有对比算法的全面超越。更准确地说，\alg{ARPSO-EIS} 在 \alg{PSO} 框架下显著优于基础版本和普通重启版本，并在保持与 \alg{ARPSO-v4} 相近性能的同时，使重启对象选择过程更加合理。
+
+\subsection{重启机制分析}
+
+Figure~\ref{fig:restart_counts} 展示了不同测试函数上的平均重启次数。可以看到，\alg{ARPSO-EIS} 与 \alg{ARPSO-v4} 的重启频率基本接近。这一点具有重要意义：如果 \alg{ARPSO-EIS} 的性能变化主要来自更频繁的重启，则其改进可能只是由更强随机扰动带来的；而实验结果显示，二者重启次数相近，说明 \alg{ARPSO-EIS} 的主要差异来自重启对象选择方式，而不是重启频率本身。
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure4_restart_counts.pdf}
+\caption{Average restart counts on different benchmark functions.}
+\label{fig:restart_counts}
+\end{figure}
+
+Figure~\ref{fig:inefficiency_score} 进一步展示了 \alg{ARPSO-EIS} 中被重启粒子的平均低效分数。可以看到，被重启粒子具有较高的低效分数，说明算法确实倾向于选择适应度相对落后、空间位置较拥挤且历史贡献较低的粒子。这从机制层面说明，\alg{ARPSO-EIS} 并不是随机改变重启对象，而是按照预先定义的搜索价值指标进行定向选择。
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure5_inefficiency_score.pdf}
+\caption{Inefficiency-score analysis of restarted particles in ARPSO-EIS.}
+\label{fig:inefficiency_score}
+\end{figure}
+
+综合主结果、平均排名、统计检验和重启行为分析可以认为，\alg{ARPSO-EIS} 的主要价值在于改进了重启型 \alg{PSO} 中较为粗糙的粒子选择环节。该机制并未保证算法在所有函数上取得最优结果，但在不明显破坏原有自适应重启框架稳定性的前提下，提高了重启策略的可解释性。
+
+% ============================================================
+\FloatBarrier
+\vspace{-4pt}
+\section{结论}
+% ============================================================
+
+本文针对重启型粒子群优化算法中重启对象选择依据单一的问题，提出一种基于低效粒子识别的自适应重启粒子群优化算法 \alg{ARPSO-EIS}。该算法在自适应惯性权重和多样性反馈重启框架的基础上，从适应度劣势、空间拥挤程度和历史贡献度三个方面综合评价粒子的搜索价值，并优先选择低效粒子进行混合重启。
+
+在六个经典连续优化测试函数上的实验结果表明，\alg{ARPSO-EIS} 相比标准 \alg{PSO}、普通重启 \alg{PSO-RS} 和 \alg{GA} 具有明显优势；与 \alg{ARPSO-v4} 和 \alg{PSO-AW} 相比，统计差异不显著，但能够保持相近的综合性能。重启行为分析进一步表明，\alg{ARPSO-EIS} 并非依靠增加重启次数获得结果变化，而是在相近重启频率下改变了重启对象选择方式，使重启过程更具针对性和可解释性。
+
+需要指出的是，\alg{ARPSO-EIS} 仍属于经典 \alg{PSO} 框架下的机制改进方法，其性能优势具有一定函数依赖性。在部分测试函数上，\alg{DE} 仍表现出更强的优化能力。因此，后续研究可从三个方向展开：一是进一步研究低效粒子评分权重的自适应调整方法；二是将低效粒子识别机制与更丰富的局部搜索算子结合；三是在 CEC 基准函数和实际工程优化问题上验证算法的泛化能力。
+
+
+\FloatBarrier
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

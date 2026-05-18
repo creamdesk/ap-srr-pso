@@ -1,0 +1,5 @@
+﻿column,dtype_from_head,non_null_in_head,example
+ComparedAlgorithm,object,8,ARPSO-v4
+Win,int64,8,1
+NSD,int64,8,27
+Loss,int64,8,1

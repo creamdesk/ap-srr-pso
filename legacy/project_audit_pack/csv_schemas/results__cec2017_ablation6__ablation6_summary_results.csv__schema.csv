@@ -1,0 +1,11 @@
+﻿column,dtype_from_head,non_null_in_head,example
+FunctionID,int64,50,1
+Function,object,50,F1
+Algorithm,object,50,ARPSO-EIS
+MeanError,float64,50,76499.01224010966
+StdError,float64,50,255671.415379332
+MedianError,float64,50,20842.185943910168
+BestError,float64,50,75.61243834689847
+WorstError,float64,50,1380820.3896917887
+AvgRestart,float64,50,2401.5666666666666
+AvgRuntime,float64,50,9.05126501719157

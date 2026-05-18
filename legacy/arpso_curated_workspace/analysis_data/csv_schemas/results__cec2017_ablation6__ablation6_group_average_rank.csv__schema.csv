@@ -1,0 +1,4 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Group,object,24,Composition
+Algorithm,object,24,ARPSO-Local
+GroupAverageRank,float64,24,2.333333333333333

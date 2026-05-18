@@ -1,0 +1,18 @@
+\subsection{Ablation Study}
+Table~\ref{tab:ablation} reports the complete six-variant ablation results on the CEC2017 benchmark suite. Lower average rank indicates better overall performance. ARPSO-SRR and ARPSO-Local obtain the same best average rank of 2.71, followed by ARPSO-Fixed and ARPSO-EIS. This result indicates that the proposed search-resource reallocation mechanism is competitive with the more aggressive local restart strategy while preserving the simplicity of the adaptive hybrid restart framework.
+
+\input{tables/table_ablation6_revised.tex}
+
+The restart statistics further clarify the difference between ARPSO-SRR and ARPSO-Local. Although both variants reach the best average rank, ARPSO-Local triggers 3561.7 restart events on average and replaces 33812.2 particles, whereas ARPSO-SRR triggers 2229.8 restart events and replaces 14847.4 particles. In other words, ARPSO-Local replaces about 2.28 times as many particles as ARPSO-SRR. This suggests that ARPSO-SRR does not simply rely on a stronger or more aggressive restart operation; instead, it controls the restart intensity and reallocates search resources in a more economical manner.
+
+Fig.~\ref{fig:ablation} visualizes the ablation comparison. The figure supports the same observation as Table~\ref{tab:ablation}: ARPSO-SRR achieves the best overall ranking performance together with ARPSO-Local, while avoiding the substantially larger particle replacement cost of the local restart variant.
+
+\begin{figure}[!t]
+    \centering
+    \safeincludegraphics[width=\linewidth]{ablation6_average_rank.pdf}
+    \caption{Ablation comparison of the six restart variants on the CEC2017 benchmark suite. Lower average rank indicates better performance.}
+    \label{fig:ablation}
+\end{figure}
+
+The global Friedman test also confirms that the restart design has a statistically observable influence on the overall performance. Across 28 benchmark functions and 6 variants, the Friedman statistic is 21.6596 with $p=6.08\times 10^{-4}$. The pairwise Wilcoxon summary should be interpreted conservatively. ARPSO-SRR obtains 6/22/0 win/no-significant-difference/loss counts against PSO-RS, 8/19/1 against ARPSO-Global, 5/22/1 against ARPSO-EIS, and 1/24/3 against ARPSO-Local. Therefore, the ablation study does not suggest that ARPSO-SRR significantly dominates all restart variants on every function. Instead, it shows that ARPSO-SRR provides a favorable balance between ranking performance and restart cost, which is consistent with the motivation of computational resource reallocation.
+

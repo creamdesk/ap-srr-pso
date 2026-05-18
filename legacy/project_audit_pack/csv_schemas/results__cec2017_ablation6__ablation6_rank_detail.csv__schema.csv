@@ -1,0 +1,7 @@
+﻿column,dtype_from_head,non_null_in_head,example
+FunctionID,int64,50,1
+Function,object,50,F1
+Algorithm,object,50,ARPSO-EIS
+MeanError,float64,50,76499.01224010966
+Rank,float64,50,5.0
+Group,object,50,Unimodal

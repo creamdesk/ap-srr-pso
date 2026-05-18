@@ -1,0 +1,10 @@
+﻿column,dtype_from_head,non_null_in_head,example
+ExperimentMode,object,50,full
+Function,object,50,CEC2017-F1
+Algorithm,object,50,PSO-RS
+Run,int64,50,1
+RestartIndex,int64,50,1
+RestartIter,int64,50,3392
+RestartRatio,float64,50,0.1
+RestartSigma,float64,50,4.345724287381231
+RestartInefficiencyScore,float64,0,

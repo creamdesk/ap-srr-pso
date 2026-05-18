@@ -1,0 +1,6 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,9,ARPSO-EIS
+AvgRuntimeSeconds,float64,9,72.06791686482762
+StdRuntimeSeconds,float64,9,79.4146788911596
+TotalRuntimeSeconds,float64,9,62699.087672400026
+RelativeRuntime,float64,9,1.003464451697068

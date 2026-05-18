@@ -1,0 +1,328 @@
+===== pdflatex round 1 | returncode=0 =====
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-03-20>
+(IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/cite\cite.sty)
+(D:\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(D:\MiKTeX\tex/latex/amsmath\amstext.sty
+(D:\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(D:\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(D:\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(D:\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(D:\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithms\algorithm.sty
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/float\float.sty)
+(D:\MiKTeX\tex/latex/base\ifthen.sty))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithmicx\algpseudocode.sty
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithmicx\algorithmicx.sty
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (D:\MiKTeX\tex/latex/graphics\graphicx.sty
+(D:\MiKTeX\tex/latex/graphics\keyval.sty)
+(D:\MiKTeX\tex/latex/graphics\graphics.sty
+(D:\MiKTeX\tex/latex/graphics\trig.sty)
+(D:\MiKTeX\tex/latex/graphics-cfg\graphics.cfg)
+(D:\MiKTeX\tex/latex/graphics-def\pdftex.def)))
+(D:\MiKTeX\tex/latex/base\textcomp.sty) (D:\MiKTeX\tex/latex/xcolor\xcolor.sty
+(D:\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(D:\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(D:\MiKTeX\tex/latex/tools\array.sty)
+(D:\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def)
+No file main.aux.
+-- Lines per column: 56 (exact).
+(D:\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (D:\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
+(D:\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg))
+(D:\MiKTeX\tex/latex/amsfonts\umsa.fd) (D:\MiKTeX\tex/latex/amsfonts\umsb.fd)
+
+LaTeX Warning: Citation `b1' on page 1 undefined on input line 73.
+
+
+LaTeX Warning: Citation `b2' on page 1 undefined on input line 77.
+
+
+LaTeX Warning: Citation `b3' on page 1 undefined on input line 77.
+
+
+LaTeX Warning: Citation `b4' on page 1 undefined on input line 77.
+
+
+Underfull \hbox (badness 1635) in paragraph at lines 88--89
+\OT1/ptm/m/n/10 con-ducted. Av-er-age rank-ing, function-group rank-ing,
+
+Underfull \vbox (badness 1024) has occurred while \output is active [1{C:/Users
+/63947/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{D:/MiKTeX/fonts/enc/dv
+ips/base/8r.enc}]
+
+LaTeX Warning: Reference `sec:related' on page 2 undefined on input line 91.
+
+
+LaTeX Warning: Reference `sec:method' on page 2 undefined on input line 91.
+
+
+LaTeX Warning: Reference `sec:experiment' on page 2 undefined on input line 91.
+
+
+
+LaTeX Warning: Reference `sec:results' on page 2 undefined on input line 91.
+
+
+LaTeX Warning: Reference `sec:conclusion' on page 2 undefined on input line 91.
+
+
+
+LaTeX Warning: Citation `b2' on page 2 undefined on input line 110.
+
+
+LaTeX Warning: Citation `b12' on page 2 undefined on input line 110.
+
+
+LaTeX Warning: Citation `b11' on page 2 undefined on input line 110.
+
+
+LaTeX Warning: Citation `b4' on page 2 undefined on input line 110.
+
+
+LaTeX Warning: Citation `b13' on page 2 undefined on input line 115.
+
+
+LaTeX Warning: Citation `b14' on page 2 undefined on input line 115.
+
+
+LaTeX Warning: Reference `fig:framework' on page 2 undefined on input line 124.
+
+
+
+LaTeX Warning: Reference `tab:parameters' on page 2 undefined on input line 147
+.
+
+[2 <./figures/framework_tikz_final.pdf>]
+
+LaTeX Warning: Reference `alg:arpso_srr' on page 3 undefined on input line 200.
+
+
+
+LaTeX Warning: Reference `eq:pso_velocity' on page 3 undefined on input line 21
+0.
+
+
+LaTeX Warning: Reference `eq:pso_position' on page 3 undefined on input line 21
+1.
+
+
+LaTeX Warning: Reference `eq:diversity' on page 3 undefined on input line 213.
+
+
+LaTeX Warning: Reference `eq:restart_ratio' on page 3 undefined on input line 2
+16.
+
+
+LaTeX Warning: Reference `eq:restart_number' on page 3 undefined on input line 
+217.
+
+
+LaTeX Warning: Reference `eq:diversity' on page 3 undefined on input line 230.
+
+[3]
+
+LaTeX Warning: Citation `b5' on page 4 undefined on input line 235.
+
+
+Underfull \hbox (badness 3088) in paragraph at lines 235--236
+[]\OT1/ptm/m/n/10 Experiments are con-ducted on the CEC2017 single-
+
+LaTeX Warning: Reference `tab:function_groups' on page 4 undefined on input lin
+e 237.
+
+
+LaTeX Warning: Reference `tab:parameters' on page 4 undefined on input line 258
+.
+
+
+LaTeX Warning: Reference `eq:restart_demand' on page 4 undefined on input line 
+287.
+
+
+LaTeX Warning: Citation `b8' on page 4 undefined on input line 292.
+
+
+LaTeX Warning: Citation `b9' on page 4 undefined on input line 292.
+
+
+LaTeX Warning: Citation `b10' on page 4 undefined on input line 292.
+
+
+LaTeX Warning: Reference `tab:ablation' on page 4 undefined on input line 297.
+
+(tables/table_ablation6_revised.tex)
+
+LaTeX Warning: Reference `fig:ablation' on page 4 undefined on input line 303.
+
+
+LaTeX Warning: Reference `tab:ablation' on page 4 undefined on input line 303.
+
+[4]
+
+LaTeX Warning: Reference `tab:rank_runtime' on page 5 undefined on input line 3
+15.
+
+
+LaTeX Warning: Reference `tab:group_rank' on page 5 undefined on input line 345
+.
+
+
+LaTeX Warning: Reference `fig:convergence' on page 5 undefined on input line 37
+1.
+
+
+LaTeX Warning: Reference `fig:restart_behavior' on page 5 undefined on input li
+ne 380.
+
+[5 <./figures/ablation6_average_rank.pdf> <./figures/convergence_curve_tikz_fin
+al.pdf>]
+
+LaTeX Warning: Reference `tab:wilcoxon' on page 6 undefined on input line 405.
+
+
+LaTeX Warning: Reference `tab:rank_runtime' on page 6 undefined on input line 4
+27.
+
+[6 <./figures/restart_behavior_tikz_final.pdf>]
+
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
+
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
+
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
+
+[7] (main.aux)
+
+LaTeX Warning: There were undefined references.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
+ )
+(see the transcript file for additional information)<D:/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmex10.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
+<D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><D:/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmmi8.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><D
+:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><D:/MiKTeX/fonts/type1/public/
+amsfonts/cm/cmr6.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><D:/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><D:/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><D:/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy6.pfb><D:/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmsy7.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><D:/MiKTeX/
+fonts/type1/urw/times/utmb8a.pfb><D:/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><
+D:/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><D:/MiKTeX/fonts/type1/urw/times/utm
+ri8a.pfb>
+Output written on main.pdf (7 pages, 277074 bytes).
+Transcript written on main.log.
+
+===== pdflatex round 2 | returncode=0 =====
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (MiKTeX 26.2) (preloaded format=pdflatex.fmt)
+ restricted \write18 enabled.
+entering extended mode
+(main.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-03-20>
+(IEEEtran.cls
+Document Class: IEEEtran 2015/08/26 V1.8b by Michael Shell
+-- See the "IEEEtran_HOWTO" manual for usage information.
+-- http://www.michaelshell.org/tex/ieeetran/
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/psnfss\ot1ptm.fd)
+-- Using 8.5in x 11in (letter) paper.
+-- Using PDF output.
+-- This is a 10 point document.
+) (C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/cite\cite.sty)
+(D:\MiKTeX\tex/latex/amsmath\amsmath.sty
+For additional information on amsmath, use the `?' option.
+(D:\MiKTeX\tex/latex/amsmath\amstext.sty
+(D:\MiKTeX\tex/latex/amsmath\amsgen.sty))
+(D:\MiKTeX\tex/latex/amsmath\amsbsy.sty)
+(D:\MiKTeX\tex/latex/amsmath\amsopn.sty))
+(D:\MiKTeX\tex/latex/amsfonts\amssymb.sty
+(D:\MiKTeX\tex/latex/amsfonts\amsfonts.sty))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithms\algorithm.sty
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/float\float.sty)
+(D:\MiKTeX\tex/latex/base\ifthen.sty))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithmicx\algpseudocode.sty
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/algorithmicx\algorithmicx.sty
+Document Style algorithmicx 1.2 - a greatly improved `algorithmic' style
+)
+Document Style - pseudocode environments for use with the `algorithmicx' style
+) (D:\MiKTeX\tex/latex/graphics\graphicx.sty
+(D:\MiKTeX\tex/latex/graphics\keyval.sty)
+(D:\MiKTeX\tex/latex/graphics\graphics.sty
+(D:\MiKTeX\tex/latex/graphics\trig.sty)
+(D:\MiKTeX\tex/latex/graphics-cfg\graphics.cfg)
+(D:\MiKTeX\tex/latex/graphics-def\pdftex.def)))
+(D:\MiKTeX\tex/latex/base\textcomp.sty) (D:\MiKTeX\tex/latex/xcolor\xcolor.sty
+(D:\MiKTeX\tex/latex/graphics-cfg\color.cfg)
+(D:\MiKTeX\tex/latex/graphics\mathcolor.ltx))
+(C:\Users\63947\AppData\Roaming\MiKTeX\tex/latex/booktabs\booktabs.sty)
+(D:\MiKTeX\tex/latex/tools\array.sty)
+(D:\MiKTeX\tex/latex/l3backend\l3backend-pdftex.def) (main.aux)
+-- Lines per column: 56 (exact).
+(D:\MiKTeX\tex/context/base/mkii\supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+) (D:\MiKTeX\tex/latex/epstopdf-pkg\epstopdf-base.sty
+(D:\MiKTeX\tex/latex/00miktex\epstopdf-sys.cfg))
+(D:\MiKTeX\tex/latex/amsfonts\umsa.fd) (D:\MiKTeX\tex/latex/amsfonts\umsb.fd)
+Underfull \hbox (badness 1635) in paragraph at lines 88--89
+\OT1/ptm/m/n/10 con-ducted. Av-er-age rank-ing, function-group rank-ing,
+
+Underfull \vbox (badness 1024) has occurred while \output is active [1{C:/Users
+/63947/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map}{D:/MiKTeX/fonts/enc/dv
+ips/base/8r.enc}] [2 <./figures/framework_tikz_final.pdf>] [3]
+Underfull \hbox (badness 3088) in paragraph at lines 235--236
+[]\OT1/ptm/m/n/10 Experiments are con-ducted on the CEC2017 single-
+(tables/table_ablation6_revised.tex) [4] [5 <./figures/ablation6_average_rank.p
+df> <./figures/convergence_curve_tikz_final.pdf>] [6 <./figures/restart_behavio
+r_tikz_final.pdf>]
+
+** Conference Paper **
+Before submitting the final camera ready copy, remember to:
+
+ 1. Manually equalize the lengths of two columns on the last page
+ of your paper;
+
+ 2. Ensure that any PostScript and/or PDF output post-processing
+ uses only Type 1 fonts and that every step in the generation
+ process uses the appropriate paper size.
+
+[7] (main.aux) )
+(see the transcript file for additional information)<D:/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmex10.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi10.pfb>
+<D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmmi7.pfb><D:/MiKTeX/fonts/type1/publ
+ic/amsfonts/cm/cmmi8.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr10.pfb><D
+:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr5.pfb><D:/MiKTeX/fonts/type1/public/
+amsfonts/cm/cmr6.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmr7.pfb><D:/MiK
+TeX/fonts/type1/public/amsfonts/cm/cmr8.pfb><D:/MiKTeX/fonts/type1/public/amsfo
+nts/cm/cmsy10.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy5.pfb><D:/MiKTe
+X/fonts/type1/public/amsfonts/cm/cmsy6.pfb><D:/MiKTeX/fonts/type1/public/amsfon
+ts/cm/cmsy7.pfb><D:/MiKTeX/fonts/type1/public/amsfonts/cm/cmsy8.pfb><D:/MiKTeX/
+fonts/type1/urw/times/utmb8a.pfb><D:/MiKTeX/fonts/type1/urw/times/utmbi8a.pfb><
+D:/MiKTeX/fonts/type1/urw/times/utmr8a.pfb><D:/MiKTeX/fonts/type1/urw/times/utm
+ri8a.pfb>
+Output written on main.pdf (7 pages, 276573 bytes).
+Transcript written on main.log.

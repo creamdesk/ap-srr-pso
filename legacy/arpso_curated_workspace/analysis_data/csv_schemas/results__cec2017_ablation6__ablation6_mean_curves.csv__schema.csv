@@ -1,0 +1,7 @@
+﻿column,dtype_from_head,non_null_in_head,example
+FunctionID,int64,50,1
+Function,object,50,F1
+Algorithm,object,50,ARPSO-EIS
+FE,int64,50,5000
+MeanBestError,float64,50,7485206763.134882
+StdBestError,float64,50,2214721277.733887

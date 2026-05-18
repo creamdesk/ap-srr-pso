@@ -1,0 +1,447 @@
+\documentclass[10pt,twocolumn]{ctexart}
+
+% ============================================================
+% IEEE-like conference paper template
+% Compile with: XeLaTeX -> BibTeX -> XeLaTeX -> XeLaTeX
+% ============================================================
+
+\usepackage[a4paper,left=1.65cm,right=1.65cm,top=1.85cm,bottom=2.0cm,columnsep=0.62cm]{geometry}
+\usepackage{amsmath,amssymb,bm}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage[section]{placeins}
+\usepackage{dblfloatfix}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[hidelinks]{hyperref}
+
+% ============================================================
+% English names for ctexart
+% ============================================================
+
+\renewcommand{\abstractname}{Abstract}
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\renewcommand{\refname}{References}
+\floatname{algorithm}{Algorithm}
+
+\captionsetup[figure]{name=Figure}
+\captionsetup[table]{name=Table}
+
+% ============================================================
+% Formatting
+% ============================================================
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0pt}
+\linespread{1.03}
+
+\titlespacing*{\section}{0pt}{4pt plus 1pt minus 1pt}{4pt}
+\titlespacing*{\subsection}{0pt}{6pt plus 1pt minus 1pt}{3pt}
+
+\setlength{\textfloatsep}{8pt plus 1pt minus 2pt}
+\setlength{\floatsep}{7pt plus 1pt minus 2pt}
+\setlength{\intextsep}{7pt plus 1pt minus 2pt}
+\setlength{\dbltextfloatsep}{8pt plus 1pt minus 2pt}
+\setlength{\dblfloatsep}{7pt plus 1pt minus 2pt}
+
+\captionsetup{
+  font=small,
+  labelfont=bf,
+  labelsep=period,
+  skip=4pt
+}
+
+\setlength{\abovedisplayskip}{6pt plus 1pt minus 1pt}
+\setlength{\belowdisplayskip}{6pt plus 1pt minus 1pt}
+\setlength{\abovedisplayshortskip}{4pt plus 1pt minus 1pt}
+\setlength{\belowdisplayshortskip}{4pt plus 1pt minus 1pt}
+
+\setlist[enumerate]{
+  label=\arabic*.,
+  leftmargin=2em,
+  itemsep=0pt,
+  topsep=2pt,
+  parsep=0pt,
+  partopsep=0pt
+}
+
+\graphicspath{{paper_figures/}{figures/}}
+
+\newcommand{\alg}[1]{\textsc{#1}}
+\newcommand{\etal}{\emph{et al.}}
+\newcommand{\argmin}{\mathop{\mathrm{arg\,min}}}
+
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+
+% ============================================================
+% Title information
+% ============================================================
+
+\title{\bfseries Adaptive Restart Particle Swarm Optimization Based on Inefficient Particle Identification}
+
+\author{
+Chenshuo Cai\\
+Xinyang Normal University\\
+\url{cai_chenshuo@qq.com}
+\and
+Zhongyang Chen\thanks{Corresponding author: Zhongyang Chen, \url{czy112@xynu.edu.cn}}\\
+Xinyang Normal University\\
+\url{czy112@xynu.edu.cn}
+}
+
+\date{April 26, 2026}
+
+\begin{document}
+
+\maketitle
+
+% ============================================================
+% Abstract
+% ============================================================
+
+\begin{abstract}\hspace*{2em}
+Particle Swarm Optimization (\alg{PSO}) has been widely applied to continuous optimization and engineering parameter tuning problems due to its simple structure, few control parameters, and ease of implementation. However, when dealing with complex multimodal functions or ill-conditioned search spaces, standard \alg{PSO} tends to suffer from rapid particle aggregation, loss of population diversity, and stagnation in the later search stage. Restart mechanisms are commonly used to alleviate premature convergence, but existing restart-based \alg{PSO} methods usually select particles with poor fitness values for reinitialization. Such a selection criterion is relatively simple and cannot accurately characterize the actual search value of particles during the optimization process. To address this issue, this paper proposes an Adaptive Restart Particle Swarm Optimization algorithm with Inefficient-particle Selection (\alg{ARPSO-EIS}). Based on an adaptive inertia weight and diversity-driven restart framework, the proposed algorithm introduces an inefficient particle identification mechanism, which evaluates particle search value from three aspects: fitness disadvantage, spatial crowding, and historical contribution. Particles with low search utility are preferentially selected for hybrid restart operations. Experiments are conducted on six classical continuous optimization benchmark functions, and the proposed algorithm is compared with \alg{PSO}, \alg{PSO-AW}, \alg{PSO-RS}, \alg{ARPSO-v4}, \alg{GA}, and \alg{DE}. The results show that \alg{ARPSO-EIS} achieves clear performance advantages over standard \alg{PSO}, ordinary restart-based \alg{PSO-RS}, and \alg{GA}. Compared with \alg{ARPSO-v4} and \alg{PSO-AW}, the statistical differences are not significant, but \alg{ARPSO-EIS} maintains comparable overall performance while providing a more interpretable restart-object selection mechanism.
+\end{abstract}
+
+\noindent\textbf{Keywords:} Particle swarm optimization; adaptive restart; inefficient particle identification; population diversity; continuous optimization
+
+% ============================================================
+\section{Introduction}
+% ============================================================
+
+Particle Swarm Optimization (\alg{PSO}) was proposed by Kennedy and Eberhart, and its basic idea originates from bird flocking and collective foraging behavior~\cite{kennedy1995particle}. Unlike traditional optimization methods that rely on gradient information, \alg{PSO} performs optimization through the cooperative movement of multiple particles in the search space. Therefore, it has relatively low requirements on the continuity, differentiability, and convexity of the objective function. Owing to its simple structure, few parameters, and ease of implementation, \alg{PSO} has been widely used in function optimization, engineering design, scheduling optimization, feature selection, and neural network parameter tuning~\cite{poli2007overview,bonyadi2017particle,gad2022pso}.
+
+The search process of standard \alg{PSO} is mainly driven by both individual experience and group experience. Each particle moves toward its own historical best position while also approaching the global best position found by the swarm. This mechanism enables \alg{PSO} to form effective search directions in the early stage and obtain acceptable optimization results with relatively simple parameter settings. However, it also leads to a typical problem: when the global best position falls into a local optimum region, other particles gradually aggregate around that region, population diversity decreases, and the effective search range continuously shrinks. If no effective diversity recovery mechanism is introduced, the algorithm may remain in a stagnation state for a long time.
+
+To address this problem, existing studies have improved \alg{PSO} from multiple perspectives. Inertia weight strategies adjust the influence of historical velocity on current movement, thereby improving the balance between global exploration and local exploitation~\cite{shi1998modified}. Constriction factor models analyze particle trajectories from the perspective of stability and provide theoretical support for parameter selection~\cite{clerc2002particle,trelea2003particle,vandenbergh2006study}. In addition, \alg{PSO} has also been combined with mutation, local search, differential evolution, genetic operators, and restart strategies to enhance its ability to escape from local optima.
+
+Among these improvement directions, restart mechanisms provide an intuitive and effective way to alleviate premature convergence. The basic idea is to reinitialize part of the particles when search stagnation or insufficient population diversity is detected, so that the swarm can regain the ability to explore new regions. The effectiveness of a restart strategy mainly depends on two key issues: when to trigger a restart and which particles should be restarted. The former is usually determined by stagnation generations or population diversity, while the latter commonly relies on fitness ranking, namely selecting particles with poor current fitness values for restart.
+
+However, selecting restart particles solely according to fitness values has certain limitations. First, particles with poor current fitness values are not necessarily useless for the search process. Some particles may have unsatisfactory fitness but still be located in underexplored regions, thus contributing to the maintenance of population distribution. Second, some particles may not have the worst fitness values, but they may remain close to the population center or the global best position for a long time and rarely update their personal best positions. Such particles make limited contributions to further exploration of the search space. If the restart mechanism cannot identify these redundant particles, the effect of restart operations in restoring search activity may be weakened.
+
+Based on these observations, this paper proposes an Adaptive Restart Particle Swarm Optimization algorithm with Inefficient-particle Selection (\alg{ARPSO-EIS}). The proposed method does not change the basic update framework of standard \alg{PSO}; instead, it improves the selection of restart objects during the adaptive restart stage. Specifically, particle inefficiency is characterized from three aspects: fitness disadvantage, which describes the relative inferiority of the current search result; spatial crowding, which reflects the redundancy of a particle in the population distribution; and historical contribution, which measures whether a particle has recently produced effective search improvements. By integrating these three types of information, \alg{ARPSO-EIS} can preferentially restart particles with low search value rather than simply restarting particles with the worst fitness values.
+
+The main contributions of this paper are summarized as follows:
+
+\begin{enumerate}
+  \item An adaptive restart \alg{PSO} method based on inefficient particle identification is proposed. The method retains the basic search framework of \alg{PSO} and introduces a search-value evaluation mechanism only in the restart-object selection stage, leading to low implementation complexity.
+  \item An inefficient particle scoring function is constructed by combining fitness disadvantage, spatial crowding, and historical contribution. This function is used to identify particles with high search redundancy and low historical contribution, thereby improving the pertinence of restart-object selection.
+  \item Experiments are conducted on six classical continuous optimization benchmark functions with 30 independent runs. The algorithm performance is evaluated using mean value, standard deviation, average rank, convergence curves, boxplots, restart behavior analysis, and nonparametric statistical tests.
+\end{enumerate}
+
+The remainder of this paper is organized as follows. Section 2 introduces related work and basic methods. Section 3 presents the detailed design of \alg{ARPSO-EIS}. Section 4 describes the experimental settings. Section 5 analyzes the experimental results. Section 6 concludes the paper and discusses future research directions.
+
+% ============================================================
+\section{Related Work}
+% ============================================================
+
+\subsection{Standard Particle Swarm Optimization}
+
+Let $\bm{x}_i^t$ and $\bm{v}_i^t$ denote the position and velocity of the $i$-th particle at iteration $t$, respectively. Let $\bm{p}_i^t$ denote the personal best position of the particle, and let $\bm{g}^t$ denote the global best position of the swarm. The velocity and position update equations of standard \alg{PSO} are given by
+\begin{equation}
+\bm{v}_i^{t+1}
+=
+w\bm{v}_i^t
++
+c_1 r_1(\bm{p}_i^t-\bm{x}_i^t)
++
+c_2 r_2(\bm{g}^t-\bm{x}_i^t),
+\end{equation}
+\begin{equation}
+\bm{x}_i^{t+1}=\bm{x}_i^t+\bm{v}_i^{t+1},
+\end{equation}
+where $w$ is the inertia weight, $c_1$ and $c_2$ are the cognitive and social learning factors, respectively, and $r_1$ and $r_2$ are random numbers in $[0,1]$.
+
+From the perspective of search behavior, $c_1 r_1(\bm{p}_i^t-\bm{x}_i^t)$ represents the use of the particle's own historical experience, while $c_2 r_2(\bm{g}^t-\bm{x}_i^t)$ represents learning from the best experience of the swarm. When the global best position is reliable, this mechanism helps particles converge quickly. However, when the global best position is located in a local optimum region, the swarm may prematurely aggregate around that region, resulting in a serious reduction of the subsequent search space.
+
+\subsection{Adaptive Inertia Weight Strategy}
+
+The inertia weight controls the extent to which particles inherit their historical velocities and is an important parameter affecting the search behavior of \alg{PSO}. A larger inertia weight helps particles maintain a larger movement range and enhances global exploration, whereas a smaller inertia weight facilitates local refinement and improves convergence accuracy. A fixed inertia weight is difficult to satisfy the different requirements of the early and late search stages simultaneously. Therefore, adaptive inertia weight strategies have been widely used to improve \alg{PSO}.
+
+This paper adopts a nonlinear decreasing inertia weight:
+\begin{equation}
+w(t)=w_{\min}+(w_{\max}-w_{\min})\left(1-\frac{t}{T}\right)^{1.5},
+\end{equation}
+where $T$ is the maximum number of iterations, and $w_{\max}$ and $w_{\min}$ denote the upper and lower bounds of the inertia weight, respectively. This form allows the algorithm to maintain a relatively high inertia weight in the early search stage and gradually reduce it in the later stage, thereby shifting from large-scale exploration to local exploitation.
+
+\subsection{Restart-based Particle Swarm Optimization}
+
+Restart mechanisms recover population diversity by reinitializing part of the particles and are commonly used to alleviate premature convergence. Unlike complete reinitialization of the entire population, partial restart usually modifies only a subset of particles, thereby preserving existing high-quality search information while restoring exploration capability. The effectiveness of a restart strategy depends on three issues: triggering condition, restart ratio, and restart-object selection.
+
+Existing methods usually trigger restart operations according to long-term stagnation of the global best value or excessively low population diversity, and they often restart particles with poor fitness values. This strategy is simple to implement, but its selection criterion is relatively limited. Fitness reflects the current search result of a particle, but it cannot fully represent the particle's spatial distribution value and historical contribution. Therefore, this paper extends restart-object selection from ``poor fitness'' to ``low search value'', aiming to improve the effectiveness of restart operations without significantly increasing the number of restarts.
+
+% ============================================================
+\section{Proposed Algorithm}
+% ============================================================
+
+\subsection{Overall Framework}
+
+The proposed \alg{ARPSO-EIS} is built upon adaptive inertia weight \alg{PSO} and introduces a diversity-based restart mechanism in the later search stage. When the particle swarm shows obvious stagnation or insufficient diversity, the algorithm no longer simply selects particles with the worst fitness values. Instead, it identifies particles more suitable for restart through an inefficient particle scoring function. The overall process consists of the following three components:
+
+\begin{enumerate}
+  \item A nonlinear adaptive inertia weight is used to regulate the search process, making the algorithm exploration-oriented in the early stage and exploitation-oriented in the later stage.
+  \item Population diversity and stagnation windows are used to determine whether restart should be triggered, so as to avoid frequent disturbances during normal convergence.
+  \item An inefficient particle identification mechanism is used to select restart objects by comprehensively evaluating particle search value from fitness, spatial position, and historical contribution.
+\end{enumerate}
+
+The core idea of this design is that restart should not be regarded merely as a random perturbation operation, but as a limited search resource. Since each restart changes the population structure, it should preferentially act on particles that make low contributions to the current search and have redundant spatial positions.
+
+\subsection{Population Diversity Measurement}
+
+To determine whether the particle swarm has become overly concentrated, this paper adopts a normalized population diversity measure. Let the particle position matrix at iteration $t$ be $X^t=[\bm{x}_1^t,\bm{x}_2^t,\ldots,\bm{x}_N^t]^\top$, and let the population center be
+\begin{equation}
+\bar{\bm{x}}^t=\frac{1}{N}\sum_{i=1}^{N}\bm{x}_i^t,
+\end{equation}
+where $N$ is the population size. The population diversity is defined as
+\begin{equation}
+D(t)=
+\frac{1}{N\sqrt{d}(ub-lb)}
+\sum_{i=1}^{N}
+\left\|\bm{x}_i^t-\bar{\bm{x}}^t\right\|_2,
+\end{equation}
+where $d$ is the problem dimension, and $lb$ and $ub$ are the lower and upper bounds of the search space, respectively. This metric is normalized by the search range and dimension, making it convenient for comparison across different functions. A smaller $D(t)$ indicates that particles are more concentrated and the exploration ability of the swarm is reduced, whereas a larger $D(t)$ indicates that particles are more dispersed and the algorithm still maintains a certain search range.
+
+\subsection{Adaptive Restart Triggering Mechanism}
+
+This paper considers both population diversity and improvement of the global best value when triggering restart operations. When diversity remains below a threshold for several iterations, or when the global best value fails to achieve sufficient improvement within a stagnation window, the search process is considered to have entered a possible stagnation state.
+
+The diversity-based triggering condition is given by
+\begin{equation}
+D(t)<D_{\mathrm{th}},
+\end{equation}
+where $D_{\mathrm{th}}$ is the diversity threshold. The stagnation-based triggering condition is
+\begin{equation}
+f(\bm{g}^{t-s})-f(\bm{g}^{t})<\varepsilon,
+\end{equation}
+where $s$ is the stagnation window length, and $\varepsilon$ is the minimum improvement threshold.
+
+After restart is triggered, the restart ratio is jointly determined by the degree of diversity insufficiency and the severity of stagnation:
+\begin{equation}
+\begin{aligned}
+\rho(t)
+&=
+\max\left(\Delta_D(t),\frac{1}{2}\Delta_S(t)\right),\\
+\alpha(t)
+&=
+\alpha_{\min}
++
+(\alpha_{\max}-\alpha_{\min})\rho(t).
+\end{aligned}
+\end{equation}
+Here, $\alpha_{\min}$ and $\alpha_{\max}$ denote the minimum and maximum restart ratios, respectively, and $\rho(t)$ denotes the restart intensity coefficient jointly determined by diversity insufficiency and search stagnation. $\Delta_D(t)$ describes the degree to which the current diversity falls below the threshold, while $\Delta_S(t)$ describes the severity of search stagnation. This design enables the restart intensity to vary with the degree of search degradation rather than restarting a fixed proportion of particles every time.
+
+\subsection{Inefficient Particle Identification Mechanism}
+
+The main improvement of \alg{ARPSO-EIS} lies in the restart-object selection stage. Traditional \alg{ARPSO-v4} selects a group of particles with the worst fitness values for restart. Although this strategy can remove some poorly performing particles, it does not consider spatial redundancy or historical search contribution. In this paper, particle inefficiency is defined as a weighted combination of three types of information:
+\begin{equation}
+E_i=\lambda_1 R_i+\lambda_2 C_i+\lambda_3 U_i,
+\end{equation}
+where $E_i$ denotes the inefficiency score of the $i$-th particle, $R_i$ denotes the fitness-disadvantage score, $C_i$ denotes the spatial-crowding score, and $U_i$ denotes the low-contribution score. In this paper, $\lambda_1=0.50$, $\lambda_2=0.30$, and $\lambda_3=0.20$ are used, so that fitness remains the dominant factor while spatial distribution and historical contribution are also considered.
+
+The fitness-disadvantage score $R_i$ is obtained by normalizing the fitness ranking of particles. For minimization problems, a worse fitness value leads to a larger $R_i$. This indicator reflects whether the current search result of a particle is relatively inferior.
+
+The spatial-crowding score $C_i$ is used to describe whether the position of a particle is redundant. Let the distance between a particle and the population center be
+\begin{equation}
+d_i=\|\bm{x}_i-\bar{\bm{x}}\|_2.
+\end{equation}
+The spatial-crowding score is then defined as
+\begin{equation}
+C_i = 1 - \frac{d_i-d_{\min}}{d_{\max}-d_{\min}+\delta},
+\end{equation}
+where $d_{\min}$ and $d_{\max}$ are the minimum and maximum distances from all particles to the population center, respectively, and $\delta$ is a small constant used to avoid division by zero. A particle closer to the population center has a larger $C_i$, indicating a higher degree of spatial redundancy.
+
+Historical contribution records whether a particle has recently produced effective improvement. If a particle successfully updates its personal best position, its contribution value increases. Meanwhile, the contribution value slightly decays over iterations to emphasize recent search contributions. The low-contribution score $U_i$ is obtained by normalizing the contribution value and taking its complement. A lower contribution results in a larger $U_i$.
+
+Through the above design, the particles selected for restart by \alg{ARPSO-EIS} are not only relatively inferior in current fitness, but also tend to have high spatial redundancy and low historical contribution. This avoids the rough selection problem caused by relying solely on fitness ranking.
+
+\subsection{Hybrid Restart Strategy}
+
+After restart objects are determined, this paper adopts a hybrid restart strategy. The selected particles are divided into two groups. A small number of particles perform global random restart to explore new regions, while most particles perform local perturbation around the current global best position to continue exploitation near promising regions. The local perturbation scale is defined as
+\begin{equation}
+\begin{aligned}
+\eta(t)
+&=
+\sigma_{\max}
+\left(1-\frac{t}{T}\right)
+\left(0.5+\Delta_D(t)\right),\\
+\sigma(t)
+&=(ub-lb)\max\left(\sigma_{\min},\eta(t)\right).
+\end{aligned}
+\end{equation}
+As the iteration proceeds, $\sigma(t)$ gradually decreases, preventing overly strong perturbations in the later stage. Meanwhile, when the degree of diversity insufficiency is high, the perturbation scale is appropriately increased to enhance the ability to restore search activity.
+
+\subsection{Algorithm Procedure}
+
+\begin{algorithm}[H]
+\caption{ARPSO-EIS}
+\label{alg:arpso_eis}
+\begin{algorithmic}[1]
+\Require Objective function $f(\bm{x})$, population size $N$, dimension $d$, maximum iterations $T$
+\Ensure Best solution $\bm{g}$ and best fitness $f(\bm{g})$
+\State Initialize particle positions and velocities
+\State Initialize personal best positions and global best position
+\State Initialize historical contribution values of particles
+\For{$t=1$ to $T$}
+    \State Update inertia weight $w(t)$
+    \State Update particle velocities and positions
+    \State Evaluate particle fitness values
+    \State Update personal bests, global best, and contribution values
+    \State Compute population diversity $D(t)$
+    \If{restart condition is satisfied}
+        \State Compute fitness-disadvantage score $R_i$
+        \State Compute spatial-crowding score $C_i$
+        \State Compute low-contribution score $U_i$
+        \State Compute inefficiency score $E_i$
+        \State Select particles with the largest $E_i$ as restart candidates
+        \State Apply hybrid global-local restart strategy
+    \EndIf
+\EndFor
+\State \Return $\bm{g}$ and $f(\bm{g})$
+\end{algorithmic}
+\end{algorithm}
+
+% ============================================================
+\section{Experimental Settings}
+% ============================================================
+
+\subsection{Benchmark Functions}
+
+Six classical continuous optimization benchmark functions are selected in this paper, including Sphere, Rastrigin, Rosenbrock, Ackley, Griewank, and Schwefel. These functions cover different characteristics such as unimodality, multimodality, non-separability, ill-conditioned narrow valleys, and deceptive landscapes, which can comprehensively evaluate algorithm performance under different search scenarios~\cite{rastrigin1974systems,rosenbrock1960automatic,ackley1987connectionist,yao1999evolutionary,jamil2013literature,liang2013cec2014}. The benchmark functions are listed in Table~\ref{tab:benchmark_functions}.
+
+\input{paper_tables/table1_benchmark_functions.tex}
+
+\subsection{Compared Algorithms and Parameter Settings}
+
+Seven algorithms are selected for comparison: standard Particle Swarm Optimization \alg{PSO}, adaptive inertia weight Particle Swarm Optimization \alg{PSO-AW}, ordinary restart-based Particle Swarm Optimization \alg{PSO-RS}, basic adaptive restart Particle Swarm Optimization \alg{ARPSO-v4}, the proposed \alg{ARPSO-EIS}, Genetic Algorithm \alg{GA}, and Differential Evolution \alg{DE}. Among them, \alg{ARPSO-v4} can be regarded as an ablation version of the proposed method, and the main difference between \alg{ARPSO-v4} and \alg{ARPSO-EIS} lies in the restart-object selection strategy. \alg{GA} and \alg{DE} are used as classical evolutionary algorithm baselines~\cite{holland1975adaptation,goldberg1989genetic,storn1997differential}.
+
+To ensure a fair comparison, all algorithms use the same problem dimension, population size, and maximum number of iterations. Each algorithm is independently run 30 times on each benchmark function. The final best fitness value of each run is recorded, and the mean value, standard deviation, best value, worst value, median value, and average rank are further calculated. The parameter settings are shown in Table~\ref{tab:parameter_settings}.
+
+\input{paper_tables/table2_parameter_settings.tex}
+
+\subsection{Evaluation Metrics}
+
+Since swarm intelligence optimization algorithms are stochastic, a single run is insufficient to reflect algorithm stability. Therefore, this paper uses statistical results from 30 independent runs as the main evaluation basis. The mean value is used to measure average optimization ability, the standard deviation reflects stability, and the average rank compares the overall performance of algorithms across different functions. Convergence curves are used to observe the search process, boxplots are used to show the distribution of final results, and restart counts and inefficiency scores are used to analyze the behavior of the restart mechanism itself.
+
+In addition, this paper adopts the Friedman test to analyze overall differences among multiple algorithms and uses the Wilcoxon signed-rank test with \alg{ARPSO-EIS} as the baseline algorithm to further determine statistical differences between algorithms~\cite{wilcoxon1945individual,friedman1937use,demsar2006statistical,derrac2011practical}.
+
+% ============================================================
+\section{Experimental Results and Analysis}
+% ============================================================
+
+\subsection{Main Result Analysis}
+
+Table~\ref{tab:main_results} reports the mean values and standard deviations of all algorithms on the six benchmark functions, where the best results are highlighted in bold and the second-best results are underlined. Overall, standard \alg{PSO} and ordinary restart-based \alg{PSO-RS} perform relatively poorly on most functions, indicating that relying solely on standard velocity updating or simple stagnation-based restart is insufficient to effectively alleviate search stagnation on complex functions. \alg{PSO-AW} improves the search process through adaptive inertia weight and therefore achieves better results on some functions.
+
+\input{paper_tables/table3_main_results.tex}
+
+Both \alg{ARPSO-v4} and \alg{ARPSO-EIS} belong to adaptive restart-based \alg{PSO} methods. Compared with standard \alg{PSO} and \alg{PSO-RS}, they show more stable performance, indicating that introducing population diversity into restart triggering is effective. Further comparison between \alg{ARPSO-v4} and \alg{ARPSO-EIS} shows that \alg{ARPSO-EIS} does not achieve superior results on all functions, but it shows certain improvements on some complex functions. This is consistent with the design goal of the proposed algorithm: \alg{ARPSO-EIS} does not aim to simply increase restart intensity, but to improve the pertinence of restart-object selection under a similar restart frequency.
+
+It should be noted that \alg{DE} performs strongly on some functions, especially in terms of convergence speed and final accuracy for certain continuous optimization problems. This indicates that \alg{ARPSO-EIS} does not dominate all optimization landscapes. The focus of this paper is to improve the rationality and interpretability of restart strategies within the \alg{PSO} framework through a relatively small mechanism modification.
+
+\subsection{Convergence Curve Analysis}
+
+Figure~\ref{fig:convergence_curves} presents the average convergence curves on four representative benchmark functions. The convergence curves reflect the dynamic process from initial search to later convergence. For relatively simple unimodal functions such as Sphere, most algorithms can continuously reduce the objective value, but differences still exist in convergence speed and final accuracy. For complex functions such as Rastrigin, Ackley, and Schwefel, algorithms are more easily affected by local optima or complex search landscapes, and differences in later-stage search ability become more obvious.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.96\textwidth]{paper_figures/figure1_convergence_curves.pdf}
+\caption{Convergence curves on representative benchmark functions.}
+\label{fig:convergence_curves}
+\end{figure*}
+
+From the curve trends, standard \alg{PSO} enters a slow-decreasing stage relatively early on some functions, indicating that the swarm may have already aggregated into a limited region. \alg{PSO-AW} improves later-stage convergence behavior by using an adaptive inertia weight. \alg{ARPSO-v4} and \alg{ARPSO-EIS} recover part of the search activity through restart mechanisms and thus show stronger later-stage search ability on complex functions. Compared with \alg{ARPSO-v4}, the main difference of \alg{ARPSO-EIS} lies in restart-object selection, so its convergence curves do not necessarily dominate in all cases, but they can maintain comparable or better search trends on some functions.
+
+\subsection{Stability Analysis}
+
+Figure~\ref{fig:boxplots} shows the final-result boxplots on two difficult functions, Rastrigin and Schwefel. Compared with mean values, boxplots can more intuitively reflect the dispersion of results over multiple runs. A narrower box indicates more concentrated results, while a lower median indicates better typical performance.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure2_boxplots.pdf}
+\caption{Boxplots of final objective values on difficult benchmark functions.}
+\label{fig:boxplots}
+\end{figure}
+
+The boxplots show clear differences in algorithm stability on difficult functions. Some algorithms can obtain good results in individual runs, but their result distributions are relatively scattered, indicating sensitivity to initial populations and random perturbations. \alg{ARPSO-EIS} maintains a relatively stable result distribution on difficult functions, suggesting that the inefficient particle identification mechanism does not introduce obvious additional fluctuations. This also indicates that the improvement of \alg{ARPSO-EIS} is not obtained through overly strong random perturbations, but through adjusting restart-object selection within a moderate restart framework.
+
+\subsection{Average Rank Analysis}
+
+Table~\ref{tab:average_rank} and Figure~\ref{fig:average_rank} present the average ranks of all algorithms. A smaller average rank indicates better overall performance across different benchmark functions. Compared with results on a single function, average rank reduces the influence of function scale differences on overall evaluation.
+
+\input{paper_tables/table4_average_rank.tex}
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure3_average_rank.pdf}
+\caption{Average rank comparison of different algorithms.}
+\label{fig:average_rank}
+\end{figure}
+
+The average rank results show that \alg{ARPSO-v4}, \alg{ARPSO-EIS}, \alg{PSO-AW}, and \alg{DE} form the leading group, while standard \alg{PSO}, \alg{PSO-RS}, and \alg{GA} have relatively lower overall rankings. This indicates that adaptive parameter adjustment and more reasonable search-state intervention are practically meaningful for improving \alg{PSO} performance. Although the average-rank difference between \alg{ARPSO-EIS} and \alg{ARPSO-v4} is small, \alg{ARPSO-EIS} provides a more fine-grained restart-object selection basis, which is further discussed in the restart mechanism analysis.
+
+\subsection{Statistical Significance Analysis}
+
+To further verify performance differences among algorithms, this paper applies the Friedman test to compare all algorithms as a whole. The results are shown in Table~\ref{tab:friedman_test}. The Friedman test indicates that significant differences exist among the algorithms, meaning that the observed performance differences are not caused merely by random fluctuations.
+
+\input{paper_tables/table5_friedman_test.tex}
+
+Furthermore, using \alg{ARPSO-EIS} as the baseline algorithm, the Wilcoxon signed-rank test is conducted for pairwise comparisons with other algorithms. The results are shown in Table~\ref{tab:wilcoxon_summary}. The results show that \alg{ARPSO-EIS} has significant advantages over standard \alg{PSO}, ordinary restart-based \alg{PSO-RS}, and \alg{GA}. Compared with \alg{ARPSO-v4} and \alg{PSO-AW}, the statistical differences are not significant. Compared with \alg{DE}, \alg{ARPSO-EIS} achieves advantages on some functions but still shows gaps on others.
+
+\input{paper_tables/table6_wilcoxon_summary.tex}
+
+These statistical results indicate that the improvement of \alg{ARPSO-EIS} should not be interpreted as a complete superiority over all compared algorithms. More accurately, \alg{ARPSO-EIS} significantly outperforms the basic and ordinary restart versions within the \alg{PSO} framework, while maintaining performance comparable to \alg{ARPSO-v4} and making the restart-object selection process more reasonable.
+
+\subsection{Restart Mechanism Analysis}
+
+Figure~\ref{fig:restart_counts} shows the average restart counts on different benchmark functions. It can be observed that the restart frequencies of \alg{ARPSO-EIS} and \alg{ARPSO-v4} are generally close. This is important because if the performance change of \alg{ARPSO-EIS} mainly came from more frequent restarts, the improvement might simply be caused by stronger random perturbations. However, the experimental results show that the restart counts of the two algorithms are similar, indicating that the main difference of \alg{ARPSO-EIS} lies in restart-object selection rather than restart frequency.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure4_restart_counts.pdf}
+\caption{Average restart counts on different benchmark functions.}
+\label{fig:restart_counts}
+\end{figure}
+
+Figure~\ref{fig:inefficiency_score} further shows the average inefficiency scores of restarted particles in \alg{ARPSO-EIS}. The restarted particles have relatively high inefficiency scores, indicating that the algorithm indeed tends to select particles with relatively poor fitness, crowded spatial positions, and low historical contribution. This demonstrates at the mechanism level that \alg{ARPSO-EIS} does not randomly change restart objects, but selects them according to a predefined search-value indicator.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[width=\linewidth]{paper_figures/figure5_inefficiency_score.pdf}
+\caption{Inefficiency-score analysis of restarted particles in ARPSO-EIS.}
+\label{fig:inefficiency_score}
+\end{figure}
+
+Combining the main results, average ranks, statistical tests, and restart behavior analysis, it can be concluded that the main value of \alg{ARPSO-EIS} lies in improving the relatively rough particle selection process in restart-based \alg{PSO}. Although this mechanism does not guarantee the best result on every function, it improves the interpretability of the restart strategy without obviously damaging the stability of the original adaptive restart framework.
+
+% ============================================================
+\FloatBarrier
+\vspace{-4pt}
+\section{Conclusion}
+% ============================================================
+
+This paper addresses the problem that restart-object selection in restart-based particle swarm optimization is often based on a single criterion. An Adaptive Restart Particle Swarm Optimization algorithm with Inefficient-particle Selection, namely \alg{ARPSO-EIS}, is proposed. Based on adaptive inertia weight and diversity-driven restart, the proposed algorithm evaluates particle search value from three aspects: fitness disadvantage, spatial crowding, and historical contribution, and preferentially selects inefficient particles for hybrid restart.
+
+Experiments on six classical continuous optimization benchmark functions show that \alg{ARPSO-EIS} has clear advantages over standard \alg{PSO}, ordinary restart-based \alg{PSO-RS}, and \alg{GA}. Compared with \alg{ARPSO-v4} and \alg{PSO-AW}, the statistical differences are not significant, but \alg{ARPSO-EIS} maintains comparable overall performance. Restart behavior analysis further shows that \alg{ARPSO-EIS} does not obtain performance changes by increasing the number of restarts. Instead, it changes the selection of restart objects under similar restart frequencies, making the restart process more targeted and interpretable.
+
+It should be pointed out that \alg{ARPSO-EIS} is still a mechanism-improvement method within the classical \alg{PSO} framework, and its performance advantage is somewhat function-dependent. On some benchmark functions, \alg{DE} still shows stronger optimization capability. Therefore, future work can be carried out in three directions. First, adaptive adjustment methods for the weights in the inefficient particle scoring function can be further studied. Second, the inefficient particle identification mechanism can be combined with richer local search operators. Third, the generalization ability and stability of the proposed algorithm can be further verified on CEC benchmark suites and real-world engineering optimization problems.
+
+\FloatBarrier
+
+\bibliographystyle{IEEEtran}
+\bibliography{refs}
+
+\end{document}

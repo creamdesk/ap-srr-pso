@@ -1,0 +1,48 @@
+**✅ 好的！我已经把你上传的所有PSO论文逐一总结好了**（按重要性和引用优先级排序）。
+
+每篇论文我都标注了**主要内容** + **对你的论文（基于自适应参数与停滞重启机制的PSO）的具体用途**，方便你直接写引言、相关工作、理论背景或对比实验。
+
+### 1. **Kennedy & Eberhart (1995) - Particle Swarm Optimization**  
+**主要内容**：PSO算法的**原始奠基论文**，首次提出粒子群优化概念，模拟鸟群觅食行为，引入基本速度更新公式（cognition + social）和位置更新公式。  
+**用途**：**必须引用**（引言 + 标准PSO部分）。用来介绍标准PSO的来源、速度/位置更新公式（公式(1)(2)）。
+
+### 2. **Shi & Eberhart (1998) - A Modified Particle Swarm Optimizer**  
+**主要内容**：首次在PSO速度更新公式中引入**惯性权重 (inertia weight) w**，证明它能显著平衡全局探索和局部开发能力。  
+**用途**：**必须引用**（自适应参数部分的核心基础）。你的“自适应惯性权重”就是直接从这篇延伸出来的。
+
+### 3. **Clerc & Kennedy (2002) - The Particle Swarm—Explosion, Stability, and Convergence...**  
+**主要内容**：系统分析PSO的**爆炸现象、稳定性与收敛性**，提出收缩因子（constriction coefficient）来控制速度爆炸，并给出5维数学模型。  
+**用途**：**强烈推荐**用于**相关工作/理论背景**。用来解释标准PSO存在“早熟收敛、种群停滞、不稳定”等缺陷，为你的**自适应参数 + 停滞重启**改进提供理论支撑。
+
+### 4. **Kessentini & Barchiesi (2015) - Particle Swarm Optimization with Adaptive Inertia Weight**  
+**主要内容**：提出基于粒子最佳位置反馈的**自适应惯性权重**机制，通过动态调整ω来交替探索和开发。  
+**用途**：直接支撑你的**自适应参数调节**设计，可作为早期自适应惯性权重工作的代表性引用。
+
+### 5. **Liu et al. (2022) - A Study on Particle Swarm Algorithm Based on Restart Strategy and Adaptive Dynamic Mechanism (RDS-PSO)**  
+**主要内容**：提出**重启策略 + 自适应动态调整机制**（倒S型惯性权重 + 自适应学习因子），用于机器人路径规划。  
+**用途**：**和你当前题目最像**！强烈推荐大量参考其**重启机制、结构、实验设计和图表**。
+
+### 6. **Song et al. (2023) - A Multi-Strategy Adaptive Particle Swarm Optimization Algorithm**  
+**主要内容**：多策略自适应PSO（APSO/DU），包含速度和位置的双更新策略 + 约束因子，用于投资组合优化。  
+**用途**：作为**2023年多策略自适应PSO的对照模型**，可用于相关工作和对比实验。
+
+### 7. **Yin et al. (2023) - Reinforcement-learning-based parameter adaptation method for PSO (RLAM/RLPSO)**  
+**主要内容**：使用强化学习（DDPG）动态适应PSO参数（w、c1、c2），提出RLAM方法和RLPSO算法。  
+**用途**：作为**近年参数自适应工作的最新代表**，可用于相关工作，体现“参数自适应”是当前热点。
+
+### 8. **Han et al. (2024) - DCWPSO: particle swarm optimization with dynamic inertia weight updating...**  
+**主要内容**：动态惯性权重 + 余弦相似度 + 动态邻域 + 最差-最好示例学习策略的最新PSO变体。  
+**用途**：**2024年最新强对照**，可用于实验对比，说明“动态惯性权重 + 增强学习策略”是当前研究热点。
+
+---
+
+**总结建议（写论文时直接这样用）**：
+- **必引3篇**：1995（原始）、1998（惯性权重）、2002（收敛理论）。
+- **重点参考**：2022 Liu（重启机制最像你）、2015 Kessentini（自适应惯性权重）、2024 Han（最新对照）。
+- 剩下几篇作为近年相关工作补充即可。
+
+需要我现在就帮你：
+- 把这些论文**转成BibTeX格式**（直接复制进`.bib`文件）？
+- 还是**直接写完整“相关工作”节**的LaTeX内容？
+
+你说一声就行，我们继续往下写论文！🚀

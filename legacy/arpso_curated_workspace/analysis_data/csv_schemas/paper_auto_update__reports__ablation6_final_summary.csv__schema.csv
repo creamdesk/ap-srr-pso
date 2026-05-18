@@ -1,0 +1,7 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,6,ARPSO-Local
+AverageRank,float64,6,2.5
+AvgRestart,float64,6,3426.9142857142856
+StdRestart,float64,6,296.93799692827275
+AvgRuntime,float64,6,34.10698906296776
+StdRuntime,float64,6,22.239104207698112

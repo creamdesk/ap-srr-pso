@@ -1,0 +1,33 @@
+================================================================================
+CEC2017 Ablation-6 Auto Finalization Report
+================================================================================
+Status          : INCOMPLETE / PREVIEW
+Finished tasks  : 2650 / 5220
+Progress        : 50.77%
+Complete funcs  : 14 / 29
+Function IDs    : [1, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+Average rank summary:
+   Algorithm  AverageRank  AvgRestart  AvgRuntime
+ ARPSO-Local     2.500000 3426.914286   34.106989
+   ARPSO-SRR     2.857143 2243.154762   34.529414
+   ARPSO-EIS     3.571429 2023.435714   35.847323
+ ARPSO-Fixed     3.571429 1624.990476   34.919858
+ARPSO-Global     4.214286 1534.835714   34.111780
+      PSO-RS     4.285714 1246.790476   34.215759
+
+Wilcoxon summary:
+BaseAlgorithm ComparedAlgorithm  Win  NSD  Loss
+    ARPSO-SRR            PSO-RS    2   12     0
+    ARPSO-SRR       ARPSO-Fixed    1   13     0
+    ARPSO-SRR      ARPSO-Global    2   12     0
+    ARPSO-SRR       ARPSO-Local    0   13     1
+    ARPSO-SRR         ARPSO-EIS    3   11     0
+
+Friedman:
+    Test  Statistic   PValue  NumBlocks  NumAlgorithms
+Friedman  10.638298 0.059042         14              6
+
+Next action:
+Experiment is not complete. Use generated outputs only as preview.
+Do not submit the paper until all -- values and preview statements are removed.

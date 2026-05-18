@@ -1,0 +1,34 @@
+﻿path,size_mb,data_rows_exact_or_blank,num_columns,columns,status
+results\cec2017_ablation6\ablation6_restart_details.csv,1088.1004447937012,10356741,12,Function | FunctionID | Algorithm | Run | FE | RestartIndex | RestartedParticles | RestartRatio | Diversity | Stagnation | BestFitnessAfterRestart | BestErrorAfterRestart,ok
+results\cec\cec2017_mean_curves.csv,63.68435573577881,1565739,4,Function | Algorithm | Iteration | MeanBest,ok
+results\cec2017_ablation6\ablation6_curve_records.csv,18.260397911071777,301890,7,Function | FunctionID | Algorithm | Run | FE | BestFitness | BestError,ok
+results\cec\cec2017_full_parallel_checkpoint_restart_details.csv,9.87651252746582,124599,9,ExperimentMode | Function | Algorithm | Run | RestartIndex | RestartIter | RestartRatio | RestartSigma | RestartInefficiencyScore,ok
+results\cec\cec2017_restart_details.csv,9.87651252746582,124599,9,ExperimentMode | Function | Algorithm | Run | RestartIndex | RestartIter | RestartRatio | RestartSigma | RestartInefficiencyScore,ok
+results\cec2017_ablation6\ablation6_mean_curves.csv,0.5871076583862305,10080,6,FunctionID | Function | Algorithm | FE | MeanBestError | StdBestError,ok
+results\cec\cec2017_raw_results.csv,0.5743293762207031,7830,8,ExperimentMode | Function | Algorithm | Run | BestValue | RestartCount | RuntimeSeconds | Seed,ok
+results\cec\cec2017_full_parallel_checkpoint_raw_results.csv,0.572230339050293,7800,8,ExperimentMode | Function | Algorithm | Run | BestValue | RestartCount | RuntimeSeconds | Seed,ok
+results\cec2017_ablation6\ablation6_raw_results.csv,0.5169610977172852,5040,12,Function | FunctionID | Algorithm | Run | Seed | BestFitness | Fopt | BestError | RestartCount | RestartedParticlesTotal | Runtime | FEs,ok
+results\cec\cec2017_summary_results.csv,0.029618263244628906,261,8,Function | Algorithm | Mean | Std | Best | Worst | Median | AvgRestart,ok
+results\cec2017_ablation6\ablation6_summary_results.csv,0.02210235595703125,168,10,FunctionID | Function | Algorithm | MeanError | StdError | MedianError | BestError | WorstError | AvgRestart | AvgRuntime,ok
+results\cec\cec2017_wilcoxon_per_function_details.csv,0.021448135375976562,232,8,Function | BaseAlgorithm | ComparedAlgorithm | BaseMean | ComparedMean | Statistic | PValue | Result,ok
+results\cec\cec2017_rank_detail.csv,0.015115737915039062,261,5,Function | Algorithm | Rank | Mean | Std,ok
+results\cec2017_ablation6\ablation6_wilcoxon_per_function_details.csv,0.011707305908203125,140,8,FunctionID | Function | BaseAlgorithm | ComparedAlgorithm | BaseMeanError | ComparedMeanError | PValue | Result,ok
+results\cec\cec2017_restart_summary.csv,0.009609222412109375,261,6,Function | Algorithm | AvgRestart | StdRestart | MaxRestart | MinRestart,ok
+results\cec2017_ablation6\ablation6_rank_detail.csv,0.008256912231445312,168,6,FunctionID | Function | Algorithm | MeanError | Rank | Group,ok
+paper_auto_update\reports\ablation6_rank_detail_recomputed.csv,0.0029172897338867188,84,4,FunctionID | Algorithm | MeanError | Rank,ok
+results\cec2017_ablation6\ablation6_group_average_rank.csv,0.0008258819580078125,24,3,Group | Algorithm | GroupAverageRank,ok
+results\cec\cec2017_runtime_summary.csv,0.0007581710815429688,9,5,Algorithm | AvgRuntimeSeconds | StdRuntimeSeconds | TotalRuntimeSeconds | RelativeRuntime,ok
+paper_auto_update\reports\ablation6_final_summary.csv,0.0006494522094726562,6,6,Algorithm | AverageRank | AvgRestart | StdRestart | AvgRuntime | StdRuntime,ok
+paper_auto_update\reports\ablation6_table_values.csv,0.0006494522094726562,6,6,Algorithm | AverageRank | AvgRestart | StdRestart | AvgRuntime | StdRuntime,ok
+results\cec2017_ablation6\ablation6_runtime_summary.csv,0.00048732757568359375,6,5,Algorithm | AvgRuntime | StdRuntime | AvgFEs | RelativeRuntimeToSRR,ok
+results\cec2017_ablation6\ablation6_restart_summary.csv,0.0004482269287109375,6,4,Algorithm | AvgRestartCount | StdRestartCount | AvgRestartedParticles,ok
+results\cec\cec2017_average_rank.csv,0.0002460479736328125,9,2,Algorithm | AverageRank,ok
+results\cec\cec2017_friedman_average_rank.csv,0.0002460479736328125,9,2,Algorithm | AverageRank,ok
+arpso_real_data_updated_latex_pack\cec2017_wilcoxon_summary_ARPSO_SRR_from_raw.csv,0.00022602081298828125,8,5,BaseAlgorithm | ComparedAlgorithm | Win | NSD | Loss,ok
+results\cec2017_ablation6\ablation6_average_rank.csv,0.00018596649169921875,6,2,Algorithm | AverageRank,ok
+paper_auto_update\reports\ablation6_wilcoxon_recomputed.csv,0.00018405914306640625,5,5,BaseAlgorithm | ComparedAlgorithm | Win | NSD | Loss,ok
+results\cec2017_ablation6\ablation6_wilcoxon_summary.csv,0.00018405914306640625,5,5,BaseAlgorithm | ComparedAlgorithm | Win | NSD | Loss,ok
+results\cec\cec2017_wilcoxon_summary_nsd.csv,0.00014400482177734375,8,4,ComparedAlgorithm | Win | NSD | Loss,ok
+results\cec\cec2017_friedman_function_level.csv,0.00010204315185546875,1,5,Test | Statistic | PValue | NumBlocks | NumAlgorithms,ok
+results\cec2017_ablation6\ablation6_friedman.csv,0.0001010894775390625,1,5,Test | Statistic | PValue | NumBlocks | NumAlgorithms,ok
+paper_auto_update\reports\ablation6_friedman_recomputed.csv,9.918212890625e-05,1,5,Test | Statistic | PValue | NumBlocks | NumAlgorithms,ok

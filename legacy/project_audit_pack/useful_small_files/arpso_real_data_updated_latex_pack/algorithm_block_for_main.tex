@@ -1,0 +1,28 @@
+% Put these packages in the preamble of main.tex:
+% \usepackage{algorithm}
+% \usepackage{algpseudocode}
+
+\begin{algorithm}[!t]
+\caption{ARPSO-SRR}
+\label{alg:arpso_srr}
+\begin{algorithmic}[1]
+\State Initialize particle positions $\mathbf{x}_i$ and velocities $\mathbf{v}_i$
+\State Evaluate fitness values and initialize $\mathbf{p}_i$ and $\mathbf{g}$
+\State Initialize stagnation counter $s^t$ and diversity record $D^t$
+\While{termination criterion is not satisfied}
+    \State Update velocities using \eqref{eq:pso_velocity}
+    \State Update positions using \eqref{eq:pso_position}
+    \State Evaluate particles and update $\mathbf{p}_i$ and $\mathbf{g}$
+    \State Measure diversity $D^t$ and stagnation status $s^t$
+    \If{restart condition is satisfied}
+        \State Compute adaptive restart ratio $\rho^t$ using \eqref{eq:restart_ratio}
+        \State Determine restart number $m^t=\lceil\rho^tN\rceil$
+        \State Select particles for search resource reallocation
+        \State Apply global random restart to a subset of selected particles
+        \State Apply local perturbation restart around $\mathbf{g}$ to remaining particles
+        \State Reset stagnation-related records
+    \EndIf
+\EndWhile
+\State \Return best solution $\mathbf{g}$
+\end{algorithmic}
+\end{algorithm}

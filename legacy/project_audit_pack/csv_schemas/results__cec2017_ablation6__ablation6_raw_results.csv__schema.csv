@@ -1,0 +1,13 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Function,object,50,F1
+FunctionID,int64,50,1
+Algorithm,object,50,PSO-RS
+Run,int64,50,6
+Seed,int64,50,20360435
+BestFitness,float64,50,20973.50490195864
+Fopt,float64,50,100.0
+BestError,float64,50,20873.50490195864
+RestartCount,int64,50,1651
+RestartedParticlesTotal,int64,50,10324
+Runtime,float64,50,7.747352600097656
+FEs,int64,50,300000

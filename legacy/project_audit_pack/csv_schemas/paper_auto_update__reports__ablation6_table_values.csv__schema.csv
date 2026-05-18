@@ -1,0 +1,7 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Algorithm,object,6,PSO-RS
+AverageRank,float64,6,4.285714285714286
+AvgRestart,float64,6,1246.7904761904765
+StdRestart,float64,6,375.50057460940354
+AvgRuntime,float64,6,34.215758713086444
+StdRuntime,float64,6,22.498718872258543

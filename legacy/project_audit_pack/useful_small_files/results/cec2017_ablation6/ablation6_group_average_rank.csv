@@ -1,0 +1,25 @@
+﻿Group,Algorithm,GroupAverageRank
+Composition,ARPSO-Local,2.3333333333333335
+Composition,ARPSO-SRR,2.5555555555555554
+Composition,ARPSO-Fixed,3.3333333333333335
+Composition,ARPSO-EIS,3.7777777777777777
+Composition,PSO-RS,4.444444444444445
+Composition,ARPSO-Global,4.555555555555555
+Hybrid,ARPSO-SRR,2.7
+Hybrid,ARPSO-EIS,2.8
+Hybrid,ARPSO-Local,3.5
+Hybrid,ARPSO-Fixed,3.7
+Hybrid,PSO-RS,4.1
+Hybrid,ARPSO-Global,4.2
+Simple multimodal,ARPSO-Local,2.4285714285714284
+Simple multimodal,ARPSO-SRR,3.2857142857142856
+Simple multimodal,ARPSO-Fixed,3.4285714285714284
+Simple multimodal,ARPSO-EIS,3.7142857142857144
+Simple multimodal,ARPSO-Global,3.7142857142857144
+Simple multimodal,PSO-RS,4.428571428571429
+Unimodal,ARPSO-Local,1.5
+Unimodal,ARPSO-SRR,1.5
+Unimodal,ARPSO-Fixed,3.0
+Unimodal,ARPSO-EIS,4.5
+Unimodal,ARPSO-Global,5.0
+Unimodal,PSO-RS,5.5

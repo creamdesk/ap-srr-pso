@@ -1,0 +1,9 @@
+﻿column,dtype_from_head,non_null_in_head,example
+Function,object,50,CEC2017-F1
+Algorithm,object,50,ARPSO-EIS
+Mean,float64,50,11291.304703810116
+Std,float64,50,8106.28495815573
+Best,float64,50,279.98838722405145
+Worst,float64,50,20841.76710091616
+Median,float64,50,6728.182328200148
+AvgRestart,float64,50,74.0
