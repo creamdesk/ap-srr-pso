@@ -1,0 +1,17 @@
+# CEC2017 30D 主实验配置模板
+experiment_name: cec2017_30d_main
+benchmark: CEC2017
+dimension: 30
+functions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30]
+algorithms:
+  - PSO
+  - PSO-RS
+  - ARPSO-SRR
+  - AP-SRR-PSO
+population_size: 50
+max_fes: 300000
+runs: 30
+base_seed: 2026
+record_interval: 10
+output_dir: results/raw
+notes: "正式跑之前必须先完成 smoke test 和小规模 CEC 测试。"
