@@ -26,7 +26,7 @@ python experiments/run_experiment.py \
   --save-curves
 
 python analysis/summarize_results.py --input results/raw/direction_sweep_cec2017_10d.csv
-python analysis/statistical_tests.py --input results/raw/direction_sweep_cec2017_10d.csv --target AP-SRR-PSO
+python analysis/statistical_tests.py --input results/raw/direction_sweep_cec2017_10d.csv
 python analysis/plot_results.py --rank-csv results/stats/direction_sweep_cec2017_10d_average_rank.csv --output results/figures/direction_sweep_average_rank.pdf
 
 echo "方向筛选完成。重点查看："
