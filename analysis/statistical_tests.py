@@ -1,6 +1,7 @@
 """统计检验脚本。
 
 包括 Wilcoxon、Friedman、平均排名和 Win/Tie/Loss。
+当 --target 不存在或留空时，仍然输出平均排名和 Friedman，跳过 Win/Tie/Loss。
 """
 
 from __future__ import annotations
@@ -21,7 +22,7 @@ if str(PROJECT_ROOT) not in sys.path:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="随机优化实验统计检验")
     parser.add_argument("--input", required=True)
-    parser.add_argument("--target", default="AP-SRR-PSO", help="目标算法")
+    parser.add_argument("--target", default="", help="目标算法；留空则只输出平均排名和 Friedman")
     parser.add_argument("--alpha", type=float, default=0.05)
     parser.add_argument("--output-dir", default="results/stats")
     return parser.parse_args()
@@ -88,21 +89,29 @@ def main() -> None:
     output_dir = PROJECT_ROOT / args.output_dir
     output_dir.mkdir(parents=True, exist_ok=True)
     df = pd.read_csv(input_path)
-    if args.target not in set(df["algorithm"]):
-        raise ValueError(f"目标算法 {args.target} 不在结果文件中。可用算法: {sorted(df['algorithm'].unique())}")
+    algorithms = set(df["algorithm"])
+
     rank_df = average_rank(df)
-    wtl_df = win_tie_loss(df, args.target, args.alpha)
     friedman_df = friedman_table(df)
     stem = input_path.stem
     rank_path = output_dir / f"{stem}_average_rank.csv"
-    wtl_path = output_dir / f"{stem}_{args.target}_win_tie_loss.csv"
     friedman_path = output_dir / f"{stem}_friedman.csv"
     rank_df.to_csv(rank_path, index=False, encoding="utf-8-sig")
-    wtl_df.to_csv(wtl_path, index=False, encoding="utf-8-sig")
     friedman_df.to_csv(friedman_path, index=False, encoding="utf-8-sig")
+
     print(f"平均排名已保存: {rank_path}")
-    print(f"Win/Tie/Loss 已保存: {wtl_path}")
     print(f"Friedman 检验已保存: {friedman_path}")
+
+    if args.target:
+        if args.target not in algorithms:
+            print(f"警告：目标算法 {args.target} 不在结果文件中，跳过 Win/Tie/Loss。")
+            print(f"可用算法: {sorted(algorithms)}")
+        else:
+            wtl_df = win_tie_loss(df, args.target, args.alpha)
+            wtl_path = output_dir / f"{stem}_{args.target}_win_tie_loss.csv"
+            wtl_df.to_csv(wtl_path, index=False, encoding="utf-8-sig")
+            print(f"Win/Tie/Loss 已保存: {wtl_path}")
+
     print("\n平均排名:")
     print(rank_df.to_string(index=False))
 
