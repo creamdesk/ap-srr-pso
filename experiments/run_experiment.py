@@ -62,6 +62,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output", default="results/raw/experiment_results.csv")
     parser.add_argument("--n-jobs", type=int, default=1, help="并行任务数。Google Cloud 多核 CPU 可设为 8/16/32。")
     parser.add_argument("--save-curves", action="store_true", help="保存每个任务的收敛曲线 CSV。")
+    parser.add_argument("--dry-run", action="store_true", help="只打印任务计划，不执行优化、不写结果文件。")
     return parser.parse_args()
 
 
@@ -112,12 +113,7 @@ def run_task(task: Task, curve_dir: Path | None = None) -> dict[str, Any]:
     }
 
 
-def main() -> None:
-    args = parse_args()
-    output_path = PROJECT_ROOT / args.output
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    curve_dir = PROJECT_ROOT / "results" / "curves" if args.save_curves else None
-
+def build_tasks(args: argparse.Namespace) -> list[Task]:
     tasks: list[Task] = []
     for function_id in args.functions:
         for algorithm_index, algorithm in enumerate(args.algorithms):
@@ -135,9 +131,37 @@ def main() -> None:
                         record_interval=args.record_interval,
                     )
                 )
+    return tasks
 
+
+def print_task_plan(tasks: list[Task], output_path: Path, dry_run: bool) -> None:
+    mode = "DRY RUN" if dry_run else "RUN"
+    print(f"模式: {mode}")
     print(f"任务数: {len(tasks)}")
     print(f"输出文件: {output_path}")
+    for task in tasks[:10]:
+        print(
+            "task "
+            f"benchmark={task.benchmark} function={task.function_id} "
+            f"dimension={task.dimension} algorithm={task.algorithm} "
+            f"run={task.run} seed={task.seed} max_fes={task.max_fes}"
+        )
+    if len(tasks) > 10:
+        print(f"... 其余 {len(tasks) - 10} 个任务省略")
+
+
+def main() -> None:
+    args = parse_args()
+    output_path = PROJECT_ROOT / args.output
+    curve_dir = PROJECT_ROOT / "results" / "curves" if args.save_curves else None
+
+    tasks = build_tasks(args)
+    print_task_plan(tasks, output_path, dry_run=args.dry_run)
+    if args.dry_run:
+        print("dry-run 完成：未执行优化，未写结果文件。")
+        return
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
     if args.n_jobs == 1:
         rows = [run_task(task, curve_dir=curve_dir) for task in tqdm(tasks, desc="运行实验")]

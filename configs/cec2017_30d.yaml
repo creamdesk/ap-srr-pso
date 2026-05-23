@@ -1,4 +1,6 @@
-# CEC2017 30D 主实验配置模板
+# CEC2017 30D 正式主实验配置模板
+# 注意：这是 formal experiment，不是 smoke/mini/probe/pilot。
+# 运行前必须先完成 30D pilot，并确认输出、统计和绘图流程稳定。
 experiment_name: cec2017_30d_main
 benchmark: CEC2017
 dimension: 30
@@ -6,12 +8,14 @@ functions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 2
 algorithms:
   - PSO
   - PSO-RS
+  - PSO-AW
   - ARPSO-SRR
   - AP-SRR-PSO
+  - DE
 population_size: 50
 max_fes: 300000
 runs: 30
 base_seed: 2026
 record_interval: 10
 output_dir: results/raw
-notes: "正式跑之前必须先完成 smoke test 和小规模 CEC 测试。"
+notes: "正式跑之前必须先完成 smoke、mini validation、30D probe、30D pilot；正式结论必须基于 30 independent runs 和统计检验。"

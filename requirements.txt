@@ -2,6 +2,7 @@ numpy
 pandas
 scipy
 matplotlib
+setuptools<81
 tqdm
 pyyaml
 joblib
