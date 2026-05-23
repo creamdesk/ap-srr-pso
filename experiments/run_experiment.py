@@ -1,176 +1,60 @@
-"""统一实验入口。
+"""Backward-compatible experiment CLI wrapper.
 
-示例：
-    python experiments/run_experiment.py \
-        --benchmark Sphere \
-        --dimension 10 \
-        --functions 1 \
-        --algorithms PSO ARPSO-SRR AP-SRR-PSO DE \
-        --runs 3 \
-        --max-fes 5000 \
-        --population-size 30 \
-        --output results/raw/basic_demo.csv \
-        --save-curves
+This file used to contain a separate experiment runner. It now delegates to
+``experiments.experiment_runner`` so the repository has one canonical pipeline
+for raw CSV, summary CSV, logs, curves, resume, and dry-run behavior.
 """
-
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-import time
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
-
-import pandas as pd
-from joblib import Parallel, delayed
-from tqdm import tqdm
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from algorithms.factory import build_optimizer
-from benchmarks.problem_factory import build_problem
-
-
-@dataclass(frozen=True)
-class Task:
-    benchmark: str
-    function_id: int
-    algorithm: str
-    dimension: int
-    run: int
-    seed: int
-    population_size: int
-    max_fes: int
-    record_interval: int
+from experiments.experiment_runner import run_experiment
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="AP-SRR-PSO 统一实验入口")
-    parser.add_argument("--benchmark", required=True, help="Sphere / Rastrigin / Ackley / CEC2017 / CEC2022")
-    parser.add_argument("--dimension", type=int, required=True)
-    parser.add_argument("--functions", nargs="+", type=int, required=True)
-    parser.add_argument("--algorithms", nargs="+", required=True)
-    parser.add_argument("--runs", type=int, default=1)
-    parser.add_argument("--max-fes", type=int, default=10000)
-    parser.add_argument("--population-size", type=int, default=50)
-    parser.add_argument("--base-seed", type=int, default=2026)
-    parser.add_argument("--record-interval", type=int, default=10)
-    parser.add_argument("--output", default="results/raw/experiment_results.csv")
-    parser.add_argument("--n-jobs", type=int, default=1, help="并行任务数。Google Cloud 多核 CPU 可设为 8/16/32。")
-    parser.add_argument("--save-curves", action="store_true", help="保存每个任务的收敛曲线 CSV。")
-    parser.add_argument("--dry-run", action="store_true", help="只打印任务计划，不执行优化、不写结果文件。")
-    return parser.parse_args()
-
-
-def make_seed(base_seed: int, function_id: int, algorithm_index: int, run: int) -> int:
-    return int(base_seed + function_id * 100000 + algorithm_index * 1000 + run)
-
-
-def run_task(task: Task, curve_dir: Path | None = None) -> dict[str, Any]:
-    problem = build_problem(task.benchmark, task.function_id, task.dimension)
-    optimizer = build_optimizer(task.algorithm, population_size=task.population_size, seed=task.seed)
-
-    start = time.perf_counter()
-    result = optimizer.optimize(
-        objective=problem.objective,
-        dimension=task.dimension,
-        lower_bound=problem.lower_bound,
-        upper_bound=problem.upper_bound,
-        max_fes=task.max_fes,
-        record_interval=task.record_interval,
-    )
-    runtime = time.perf_counter() - start
-
-    curve_file = ""
-    if curve_dir is not None:
-        curve_dir.mkdir(parents=True, exist_ok=True)
-        safe_algorithm = result.algorithm.replace("/", "-").replace(" ", "_")
-        curve_path = curve_dir / f"{problem.benchmark}_{problem.function}_{task.dimension}D_{safe_algorithm}_run{task.run}.csv"
-        pd.DataFrame({"step": list(range(len(result.convergence_curve))), "best_fitness": result.convergence_curve}).to_csv(curve_path, index=False)
-        curve_file = str(curve_path.relative_to(PROJECT_ROOT))
-
-    metadata = dict(result.metadata)
-    metadata.pop("diversity_curve", None)
-
-    return {
-        "benchmark": problem.benchmark,
-        "function": problem.function,
-        "function_id": task.function_id,
-        "algorithm": result.algorithm,
-        "dimension": task.dimension,
-        "run": task.run,
-        "seed": task.seed,
-        "best_fitness": result.best_fitness,
-        "function_evaluations": result.function_evaluations,
-        "runtime_seconds": runtime,
-        "restart_count": metadata.get("restart_count", 0),
-        "curve_file": curve_file,
-        "metadata": json.dumps(metadata, ensure_ascii=False),
-    }
-
-
-def build_tasks(args: argparse.Namespace) -> list[Task]:
-    tasks: list[Task] = []
-    for function_id in args.functions:
-        for algorithm_index, algorithm in enumerate(args.algorithms):
-            for run in range(1, args.runs + 1):
-                tasks.append(
-                    Task(
-                        benchmark=args.benchmark,
-                        function_id=function_id,
-                        algorithm=algorithm,
-                        dimension=args.dimension,
-                        run=run,
-                        seed=make_seed(args.base_seed, function_id, algorithm_index, run),
-                        population_size=args.population_size,
-                        max_fes=args.max_fes,
-                        record_interval=args.record_interval,
-                    )
-                )
-    return tasks
-
-
-def print_task_plan(tasks: list[Task], output_path: Path, dry_run: bool) -> None:
-    mode = "DRY RUN" if dry_run else "RUN"
-    print(f"模式: {mode}")
-    print(f"任务数: {len(tasks)}")
-    print(f"输出文件: {output_path}")
-    for task in tasks[:10]:
-        print(
-            "task "
-            f"benchmark={task.benchmark} function={task.function_id} "
-            f"dimension={task.dimension} algorithm={task.algorithm} "
-            f"run={task.run} seed={task.seed} max_fes={task.max_fes}"
-        )
-    if len(tasks) > 10:
-        print(f"... 其余 {len(tasks) - 10} 个任务省略")
+    p = argparse.ArgumentParser(description="Backward-compatible AP-SRR-PSO experiment wrapper")
+    p.add_argument("--benchmark", required=True)
+    p.add_argument("--dimension", type=int, required=True)
+    p.add_argument("--functions", nargs="+", type=int, required=True)
+    p.add_argument("--algorithms", nargs="+", required=True)
+    p.add_argument("--runs", type=int, default=1)
+    p.add_argument("--max-fes", type=int, default=10000)
+    p.add_argument("--population-size", type=int, default=50)
+    p.add_argument("--base-seed", type=int, default=2026)
+    p.add_argument("--record-interval", type=int, default=10)
+    p.add_argument("--output", default="results/raw/experiment_results.csv", help="Used only to derive experiment_name for the new runner.")
+    p.add_argument("--n-jobs", type=int, default=1)
+    p.add_argument("--save-curves", action="store_true", help="Kept for compatibility. Curves are saved by the canonical runner.")
+    p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--resume", action="store_true")
+    return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    output_path = PROJECT_ROOT / args.output
-    curve_dir = PROJECT_ROOT / "results" / "curves" if args.save_curves else None
-
-    tasks = build_tasks(args)
-    print_task_plan(tasks, output_path, dry_run=args.dry_run)
-    if args.dry_run:
-        print("dry-run 完成：未执行优化，未写结果文件。")
-        return
-
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    if args.n_jobs == 1:
-        rows = [run_task(task, curve_dir=curve_dir) for task in tqdm(tasks, desc="运行实验")]
-    else:
-        rows = Parallel(n_jobs=args.n_jobs)(delayed(run_task)(task, curve_dir=curve_dir) for task in tqdm(tasks, desc="提交并行任务"))
-
-    df = pd.DataFrame(rows)
-    df.to_csv(output_path, index=False, encoding="utf-8-sig")
-    print(f"实验完成，结果已保存: {output_path}")
+    output_stem = Path(args.output).stem
+    if output_stem.endswith("_raw"):
+        output_stem = output_stem[:-4]
+    cfg = {
+        "experiment_name": output_stem or "experiment_results",
+        "benchmark": args.benchmark,
+        "dimension": args.dimension,
+        "functions": args.functions,
+        "algorithms": args.algorithms,
+        "runs": args.runs,
+        "max_fes": args.max_fes,
+        "population_size": args.population_size,
+        "base_seed": args.base_seed,
+        "record_interval": args.record_interval,
+        "n_jobs": args.n_jobs,
+    }
+    run_experiment(cfg, dry_run=args.dry_run, resume=args.resume)
 
 
 if __name__ == "__main__":
