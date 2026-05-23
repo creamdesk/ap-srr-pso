@@ -1,0 +1,19 @@
+experiment_name: cec2017_mini_validation
+benchmark: CEC2017
+dimension: 10
+functions:
+  - 1
+  - 3
+  - 10
+algorithms:
+  - PSO
+  - PSO-RS
+  - ARPSO-SRR
+  - AP-SRR-PSO
+  - DE
+population_size: 20
+max_fes: 3000
+runs: 2
+base_seed: 20260523
+record_interval: 10
+n_jobs: 1
