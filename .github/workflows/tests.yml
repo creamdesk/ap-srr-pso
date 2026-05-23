@@ -18,6 +18,8 @@ jobs:
           pip install -r requirements.txt
       - name: Smoke test
         run: python experiments/smoke_test.py
+      - name: Validate configs
+        run: python experiments/validate_configs.py configs/mini_validation.yaml configs/cec2017_30d_probe.yaml configs/cec2017_30d_pilot.yaml
       - name: Dry-run protected main experiment
         run: python experiments/run_cec2017_main.py --dry-run
       - name: Run tests
