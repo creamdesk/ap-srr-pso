@@ -1,0 +1,23 @@
+experiment_name: cec2017_ablation
+benchmark: CEC2017
+dimension: 30
+functions:
+  - 1
+  - 3
+  - 5
+  - 10
+  - 13
+  - 20
+algorithms:
+  - PSO-RS
+  - ARPSO-SRR
+  - AP-SRR-PSO
+  - AP-SRR-PSO-NO-IPS
+  - AP-SRR-PSO-NO-ARP
+  - AP-SRR-PSO-NO-RCA
+population_size: 50
+max_fes: 50000
+runs: 5
+base_seed: 20260523
+record_interval: 50
+n_jobs: 1
