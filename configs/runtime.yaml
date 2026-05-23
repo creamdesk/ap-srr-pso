@@ -1,0 +1,22 @@
+experiment_name: cec2017_runtime
+benchmark: CEC2017
+dimension: 30
+functions:
+  - 1
+  - 3
+  - 10
+  - 13
+  - 20
+algorithms:
+  - PSO
+  - PSO-RS
+  - PSO-AW
+  - ARPSO-SRR
+  - AP-SRR-PSO
+  - DE
+population_size: 50
+max_fes: 30000
+runs: 3
+base_seed: 20260523
+record_interval: 100
+n_jobs: 1
