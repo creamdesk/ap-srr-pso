@@ -1,6 +1,6 @@
 # Experiment Run Guide
 
-This guide separates engineering checks from formal paper experiments.
+This guide records safe commands for the AP-SRR-PSO experiment pipeline.
 
 ## Environment
 
@@ -8,100 +8,60 @@ Windows PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python -m pip install --upgrade pip wheel
-.\.venv\Scripts\python -m pip install -r requirements.txt
+.\.venv\Scripts\activate
+python -m pip install --upgrade pip "setuptools<81" wheel
+pip install -r requirements.txt
 ```
 
-`requirements.txt` pins `setuptools<81` because `opfunu` imports `pkg_resources`.
-
-## Engineering Checks
-
-Smoke test:
+## Safe validation
 
 ```powershell
 .\.venv\Scripts\python experiments\smoke_test.py
+.\.venv\Scripts\python experiments\run_cec2017_30d_probe.py --dry-run
+.\.venv\Scripts\python experiments\run_cec2017_main.py --dry-run
+.\.venv\Scripts\python experiments\check_cec2017_availability.py
+.\.venv\Scripts\python -m pytest tests -q
 ```
 
-Mini validation dry-run:
+## Mini validation
 
 ```powershell
-.\.venv\Scripts\python experiments\run_cec2017_mini_validation.py --dry-run
+.\.venv\Scripts\python experiments\run_cec2017_mini_validation.py
 ```
 
-30D probe dry-run:
+Mini validation is an engineering check only. It must not be cited as formal paper evidence.
+
+## 30D probe
 
 ```powershell
 .\.venv\Scripts\python experiments\run_cec2017_30d_probe.py --dry-run
-```
-
-Main runner dry-run:
-
-```powershell
-.\.venv\Scripts\python experiments\run_experiment.py `
-  --benchmark CEC2017 `
-  --dimension 30 `
-  --functions 1 3 5 10 13 20 `
-  --algorithms PSO PSO-RS PSO-AW ARPSO-SRR AP-SRR-PSO DE `
-  --runs 5 `
-  --max-fes 50000 `
-  --population-size 50 `
-  --base-seed 20260523 `
-  --output results/raw/cec2017_30d_pilot.csv `
-  --dry-run
+.\.venv\Scripts\python experiments\run_cec2017_30d_probe.py
 ```
 
 ## Pilot
 
-30D pilot should use a small function subset and 5 runs:
-
 ```powershell
-.\.venv\Scripts\python experiments\run_experiment.py `
-  --benchmark CEC2017 `
-  --dimension 30 `
-  --functions 1 3 5 10 13 20 `
-  --algorithms PSO PSO-RS PSO-AW ARPSO-SRR AP-SRR-PSO DE `
-  --runs 5 `
-  --max-fes 50000 `
-  --population-size 50 `
-  --base-seed 20260523 `
-  --output results/raw/cec2017_30d_pilot.csv `
-  --n-jobs 1
+.\.venv\Scripts\python experiments\run_cec2017_pilot.py --dry-run
 ```
 
-Pilot results are not formal paper results.
+## Formal experiment protection
 
-## Formal 30D Main Experiment
-
-Formal settings:
-
-- CEC2017 F1-F30
-- dimension = 30
-- runs = 30
-- max_fes = 300000
-- population_size = 50
-
-Use conservative local parallelism on this computer. For the current 4-core/8-thread CPU, start with `--n-jobs 1` to `--n-jobs 4`. Do not blindly use cloud-scale settings locally.
-
-## Analysis
-
-Summary:
+The formal main experiment is protected:
 
 ```powershell
-.\.venv\Scripts\python analysis\summarize_results.py --input results/raw/cec2017_30d_pilot.csv
+.\.venv\Scripts\python experiments\run_cec2017_main.py --dry-run
 ```
 
-Statistics:
+Only after probe and pilot are stable:
 
 ```powershell
-.\.venv\Scripts\python analysis\statistical_tests.py --input results/raw/cec2017_30d_pilot.csv --target AP-SRR-PSO
+.\.venv\Scripts\python experiments\run_cec2017_main.py --confirm-formal-run --resume
 ```
 
-Average-rank vector figure:
+## Resume
 
-```powershell
-.\.venv\Scripts\python analysis\plot_results.py `
-  --rank-csv results/stats/cec2017_30d_pilot_average_rank.csv `
-  --output results/figures/average_rank.pdf
-```
+All reusable experiment entries support `--resume`, which skips rows already marked `status=ok` in the raw CSV.
 
-Formal figures must be PDF/SVG. PNG is preview only.
+## Notes
+
+Do not commit `results/`. Formal figures should be PDF/SVG. PNG is preview only.
