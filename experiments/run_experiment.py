@@ -7,6 +7,7 @@ for raw CSV, summary CSV, logs, curves, resume, and dry-run behavior.
 from __future__ import annotations
 
 import argparse
+from dataclasses import dataclass
 import sys
 from pathlib import Path
 
@@ -15,6 +16,42 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from experiments.experiment_runner import run_experiment
+
+
+@dataclass(frozen=True)
+class LegacyTask:
+    benchmark: str
+    function_id: int
+    dimension: int
+    algorithm: str
+    run: int
+    seed: int
+    population_size: int
+    max_fes: int
+    record_interval: int
+
+
+def build_tasks(args: argparse.Namespace) -> list[LegacyTask]:
+    """Build deterministic legacy task objects for old contract tests/scripts."""
+    tasks: list[LegacyTask] = []
+    for function_id in args.functions:
+        for algorithm_index, algorithm in enumerate(args.algorithms):
+            for run in range(1, args.runs + 1):
+                seed = int(args.base_seed) + int(function_id) * 100000 + int(algorithm_index) * 1000 + int(run)
+                tasks.append(
+                    LegacyTask(
+                        benchmark=args.benchmark,
+                        function_id=int(function_id),
+                        dimension=int(args.dimension),
+                        algorithm=str(algorithm),
+                        run=int(run),
+                        seed=seed,
+                        population_size=int(args.population_size),
+                        max_fes=int(args.max_fes),
+                        record_interval=int(args.record_interval),
+                    )
+                )
+    return tasks
 
 
 def parse_args() -> argparse.Namespace:
