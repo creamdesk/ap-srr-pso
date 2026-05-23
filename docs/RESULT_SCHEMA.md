@@ -1,77 +1,88 @@
 # Result Schema
 
-This document defines stable CSV schemas for AP-SRR-PSO experiments.
+This document defines stable outputs for AP-SRR-PSO experiments.
 
-## Raw Result Fields
+## Raw CSV
 
 Required fields:
 
-| Field | Meaning |
-|---|---|
-| benchmark | Benchmark family, e.g. CEC2017 |
-| function_id | Numeric function id when available |
-| function | Function label, e.g. F1 |
-| dimension | Problem dimension |
-| algorithm | Canonical algorithm name |
-| run | Independent run index |
-| seed | Random seed |
-| population_size | Population size if recorded |
-| max_fes | Function-evaluation budget if recorded |
-| best_fitness | Best objective value found |
-| function_evaluations | Actual function evaluations |
-| runtime_seconds | Wall-clock runtime |
-| restart_count | Number of reallocated/restarted particles or events |
-| operator_usage | JSON dict for AP-SRR-PSO restart operators |
-| operator_success | JSON dict for operator success |
-| metadata | JSON dict for extra non-tabular fields |
-| status | ok or failed |
-| error | Error text for failed runs |
+- `experiment_name`
+- `benchmark`
+- `function`
+- `function_id`
+- `dimension`
+- `algorithm`
+- `run`
+- `seed`
+- `population_size`
+- `max_fes`
+- `best_fitness`
+- `function_evaluations`
+- `runtime_seconds`
+- `restart_count`
+- `operator_usage`
+- `operator_success`
+- `status`
+- `error`
 
-Engineering validation scripts may omit some formal fields, but formal experiment outputs should keep them stable.
+`operator_usage` and `operator_success` are JSON strings. Algorithms without restart metadata should leave these as `{}` or empty values.
 
-## Summary Fields
+## Summary CSV
 
-Required summary fields:
+Required fields:
 
-| Field | Meaning |
-|---|---|
-| benchmark | Benchmark family |
-| function_id/function | Function id or label |
-| dimension | Problem dimension |
-| algorithm | Canonical algorithm name |
-| runs | Number of successful runs used in summary |
-| mean_best | Mean best_fitness |
-| std_best | Standard deviation |
-| median | Median best_fitness when generated |
-| best | Minimum best_fitness |
-| worst | Maximum best_fitness |
-| mean_runtime_seconds | Mean runtime |
-| total_runtime_seconds | Total runtime when generated |
-| success_count | Successful runs |
-| failure_count | Failed runs |
-| rank | Average rank within the function/dimension group |
+- `experiment_name`
+- `benchmark`
+- `function`
+- `function_id`
+- `dimension`
+- `algorithm`
+- `runs`
+- `mean_best`
+- `std_best`
+- `median_best`
+- `best`
+- `worst`
+- `mean_runtime_seconds`
+- `total_runtime_seconds`
+- `success_count`
+- `failure_count`
 
-## Statistics Outputs
+## Curves JSONL
+
+Each line stores one run:
+
+- `experiment_name`
+- `benchmark`
+- `function`
+- `function_id`
+- `dimension`
+- `algorithm`
+- `run`
+- `seed`
+- `convergence_curve`
+- `function_evaluations`
+
+Long convergence curves must be stored in JSONL, not embedded into raw CSV.
+
+## Statistics CSV
 
 Expected files under `results/stats/`:
 
-- `*_average_rank.csv`
-- `*_friedman.csv`
-- `*_AP-SRR-PSO_win_tie_loss.csv`
-- `*_AP-SRR-PSO_holm_posthoc.csv`
+- average rank
+- Friedman test
+- Wilcoxon pairwise tests
+- Holm post-hoc results
+- Win/Tie/Loss summaries
 
-Statistics from fewer than 5 runs must be treated as script validation only. Formal significance requires 30 independent runs.
+Statistics from fewer than 5 runs are engineering checks only. Formal significance requires 30 independent runs.
 
-## Figure Outputs
+## Figures
 
-Formal figures:
+Formal figures must be vector graphics:
 
 - `results/figures/*.pdf`
 - `results/figures/*.svg`
 - synchronized copies in `paper/figures/`
 
-Optional preview:
-
-- `results/figures/*.png`
-
-Do not use Chinese titles or decorative backgrounds in formal figures.
+PNG files are previews only.
