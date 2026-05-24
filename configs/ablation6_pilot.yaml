@@ -1,0 +1,21 @@
+experiment_name: ablation6_pilot
+benchmark: CEC2017
+dimension: 10
+functions:
+  - 1
+  - 3
+  - 5
+algorithms:
+  - ARPSO-Local
+  - ARPSO-SRR
+  - ARPSO-EIS
+  - ARPSO-Fixed
+  - ARPSO-Global
+  - PSO-RS
+population_size: 20
+max_fes: 2000
+runs: 2
+base_seed: 20260523
+record_interval: 20
+n_jobs: 1
+notes: "Tiny real pilot for validating raw/summary/table/figure pipeline. Not a formal paper result."

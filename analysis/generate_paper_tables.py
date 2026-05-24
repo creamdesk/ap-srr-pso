@@ -1,27 +1,71 @@
 from __future__ import annotations
-import argparse, subprocess, sys
+
+import argparse
+import subprocess
+import sys
 from pathlib import Path
+
 ROOT = Path(__file__).resolve().parents[1]
 PY = sys.executable
 
-def run(cmd):
-    print('$ ' + ' '.join(cmd))
+
+def run(cmd: list[str]) -> None:
+    print("$ " + " ".join(cmd))
     subprocess.run(cmd, cwd=ROOT, check=True)
 
-def main():
-    p = argparse.ArgumentParser()
-    p.add_argument('--experiment', default='cec2017_30d_probe')
-    a = p.parse_args()
-    summary = ROOT/'results'/'summary'/f'{a.experiment}_summary.csv'
-    stats = ROOT/'results'/'stats'
-    if summary.exists():
-        run([PY,'analysis/generate_latex_tables.py','--input',str(summary.relative_to(ROOT)),'--output',f'paper/tables/{a.experiment}_summary.tex','--caption','Summary results','--label',f'tab:{a.experiment}_summary'])
-    else: print('skip summary table')
-    for name, cap in [('average_rank','Average ranking'),('friedman','Friedman ranking'),('win_tie_loss','Win tie loss'),('holm_posthoc','Holm post-hoc')]:
-        files = list(stats.glob(f'{a.experiment}_raw*{name}.csv'))
-        for f in files:
-            out = ROOT/'paper'/'tables'/(f.stem + '.tex')
-            run([PY,'analysis/generate_latex_tables.py','--input',str(f.relative_to(ROOT)),'--output',str(out.relative_to(ROOT)),'--caption',cap,'--label','tab:'+f.stem.replace('_','-')])
 
-if __name__ == '__main__':
+def latex_table(input_path: Path, output_path: Path, caption: str, label: str) -> None:
+    run(
+        [
+            PY,
+            "analysis/generate_latex_tables.py",
+            "--input",
+            str(input_path.relative_to(ROOT)),
+            "--output",
+            str(output_path.relative_to(ROOT)),
+            "--caption",
+            caption,
+            "--label",
+            label,
+        ]
+    )
+
+
+def generate_stats_if_possible(experiment: str, target: str) -> None:
+    raw = ROOT / "results" / "raw" / f"{experiment}_raw.csv"
+    if not raw.exists():
+        print(f"skip statistics: missing {raw}")
+        return
+    run([PY, "analysis/statistical_tests.py", "--input", str(raw.relative_to(ROOT)), "--target", target])
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Generate LaTeX paper tables from experiment outputs.")
+    parser.add_argument("--experiment", default="cec2017_30d_probe")
+    parser.add_argument("--target", default="ARPSO-SRR")
+    args = parser.parse_args()
+
+    results_tables = ROOT / "results" / "tables"
+    paper_tables = ROOT / "paper" / "tables"
+    results_tables.mkdir(parents=True, exist_ok=True)
+    paper_tables.mkdir(parents=True, exist_ok=True)
+
+    generate_stats_if_possible(args.experiment, args.target)
+
+    summary = ROOT / "results" / "summary" / f"{args.experiment}_summary.csv"
+    if summary.exists():
+        for base in [results_tables, paper_tables]:
+            latex_table(summary, base / f"{args.experiment}_summary.tex", "Summary results", f"tab:{args.experiment}-summary")
+    else:
+        print(f"skip summary table: missing {summary}")
+
+    stats_dir = ROOT / "results" / "stats"
+    for stats_csv in sorted(stats_dir.glob(f"{args.experiment}_raw*.csv")):
+        caption = stats_csv.stem.replace("_", " ")
+        label = "tab:" + stats_csv.stem.replace("_", "-")
+        for base in [results_tables, paper_tables]:
+            latex_table(stats_csv, base / f"{stats_csv.stem}.tex", caption, label)
+
+
+if __name__ == "__main__":
     main()

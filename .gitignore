@@ -73,6 +73,10 @@ _tmp_*.py
 *.lof
 *.lot
 
+# 论文生成产物由 analysis 脚本从 results/ 重新生成，不随 pilot 结果直接提交
+paper/figures/
+paper/tables/
+
 # 系统文件
 .DS_Store
 Thumbs.db

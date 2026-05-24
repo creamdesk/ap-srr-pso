@@ -138,6 +138,11 @@ python -m experiments.smoke_test
 # Six-group ARPSO-SRR ablation dry-run; does not execute expensive optimization.
 python -m experiments.run_ablation6 --dry-run
 
+# Tiny real pilot that validates raw/summary/table/figure generation.
+python -m experiments.run_ablation6 --config configs/ablation6_pilot.yaml
+python -m analysis.generate_tables --experiment ablation6_pilot
+python -m analysis.generate_figures --experiment ablation6_pilot --no-png
+
 # Six-group ARPSO-SRR ablation pilot; not a formal paper result unless runs/max_fes are raised.
 python -m experiments.run_ablation6
 

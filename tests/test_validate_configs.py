@@ -11,3 +11,13 @@ def test_mini_validation_config_is_valid():
 def test_ablation6_config_is_valid():
     errors = validate_config(Path('configs/ablation6.yaml'))
     assert errors == []
+
+
+def test_ablation6_pilot_config_is_valid():
+    errors = validate_config(Path('configs/ablation6_pilot.yaml'))
+    assert errors == []
+
+
+def test_smoke_test_config_is_valid():
+    errors = validate_config(Path('configs/smoke_test.yaml'))
+    assert errors == []

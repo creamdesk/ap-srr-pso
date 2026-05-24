@@ -22,13 +22,16 @@ RAW_REQUIRED = [
     "dimension",
     "algorithm",
     "run",
+    "run_id",
     "seed",
     "population_size",
     "max_fes",
     "best_fitness",
+    "error_value",
     "function_evaluations",
     "runtime_seconds",
     "status",
+    "success_flag",
     "error",
 ]
 

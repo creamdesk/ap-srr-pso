@@ -15,9 +15,9 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 RAW_FIELDS = [
     "experiment_name", "benchmark", "function", "function_id", "dimension",
-    "algorithm", "run", "seed", "population_size", "max_fes",
-    "best_fitness", "function_evaluations", "runtime_seconds",
-    "restart_count", "operator_usage", "operator_success", "status", "error",
+    "algorithm", "run", "run_id", "seed", "population_size", "max_fes",
+    "best_fitness", "error_value", "function_evaluations", "runtime_seconds",
+    "restart_count", "operator_usage", "operator_success", "status", "success_flag", "error",
 ]
 SUMMARY_FIELDS = [
     "experiment_name", "benchmark", "function", "function_id", "dimension",
@@ -34,6 +34,7 @@ def ensure_result_dirs(project_root: Path = PROJECT_ROOT) -> dict[str, Path]:
         "curves": project_root / "results" / "curves",
         "stats": project_root / "results" / "stats",
         "figures": project_root / "results" / "figures",
+        "tables": project_root / "results" / "tables",
     }
     for folder in folders.values():
         folder.mkdir(parents=True, exist_ok=True)

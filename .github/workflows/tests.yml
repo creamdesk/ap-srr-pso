@@ -19,7 +19,7 @@ jobs:
       - name: Smoke test
         run: python -m experiments.smoke_test
       - name: Validate configs
-        run: python -m experiments.validate_configs configs/mini_validation.yaml configs/cec2017_30d_probe.yaml configs/cec2017_30d_pilot.yaml configs/ablation6.yaml
+        run: python -m experiments.validate_configs configs/mini_validation.yaml configs/cec2017_30d_probe.yaml configs/cec2017_30d_pilot.yaml configs/ablation6.yaml configs/ablation6_pilot.yaml
       - name: Dry-run ablation6
         run: python -m experiments.run_ablation6 --dry-run
       - name: Dry-run protected main experiment

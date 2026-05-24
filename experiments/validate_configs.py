@@ -35,6 +35,18 @@ def load_config(path: Path) -> dict[str, Any]:
     return cfg
 
 
+def normalize_config(cfg: dict[str, Any]) -> dict[str, Any]:
+    """Accept small smoke-style configs while validating the common experiment schema."""
+    out = dict(cfg)
+    if "algorithms" not in out and "algorithm" in out:
+        out["algorithms"] = [out["algorithm"]]
+    if "base_seed" not in out and "seed" in out:
+        out["base_seed"] = out["seed"]
+    if "functions" not in out and str(out.get("benchmark", "")).lower() == "sphere":
+        out["functions"] = [out.get("function_id", 1)]
+    return out
+
+
 def _as_int(value: Any, name: str, path: Path) -> int:
     try:
         out = int(value)
@@ -44,7 +56,7 @@ def _as_int(value: Any, name: str, path: Path) -> int:
 
 
 def validate_config(path: Path) -> list[str]:
-    cfg = load_config(path)
+    cfg = normalize_config(load_config(path))
     errors: list[str] = []
 
     for field in REQUIRED_FIELDS:

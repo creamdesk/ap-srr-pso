@@ -9,7 +9,11 @@ if str(PROJECT_ROOT) not in sys.path:
 from algorithms.factory import build_optimizer
 from benchmarks.problem_factory import build_problem
 
-RAW_FIELDS = ["experiment_name","benchmark","function","function_id","dimension","algorithm","run","seed","population_size","max_fes","best_fitness","function_evaluations","runtime_seconds","restart_count","operator_usage","operator_success","status","error"]
+RAW_FIELDS = [
+    "experiment_name","benchmark","function","function_id","dimension","algorithm","run","run_id","seed",
+    "population_size","max_fes","best_fitness","error_value","function_evaluations","runtime_seconds",
+    "restart_count","operator_usage","operator_success","status","success_flag","error",
+]
 SUMMARY_FIELDS = ["experiment_name","benchmark","function","function_id","dimension","algorithm","runs","mean_best","std_best","median_best","best","worst","mean_runtime_seconds","total_runtime_seconds","success_count","failure_count"]
 
 def _path(p):
@@ -47,7 +51,7 @@ def tasks(cfg):
     return out
 
 def dirs():
-    d = {k: PROJECT_ROOT/"results"/k for k in ["raw","summary","logs","curves","stats","figures"]}
+    d = {k: PROJECT_ROOT/"results"/k for k in ["raw","summary","logs","curves","stats","figures","tables"]}
     for p in d.values(): p.mkdir(parents=True, exist_ok=True)
     return d
 
@@ -69,13 +73,16 @@ def jdump(x):
 
 def run_one(t):
     st=time.perf_counter()
-    base={"experiment_name":t["experiment_name"],"benchmark":t["benchmark"],"function":f"F{t['function_id']}","function_id":t["function_id"],"dimension":t["dimension"],"algorithm":t["algorithm"],"run":t["run"],"seed":t["seed"],"population_size":t["population_size"],"max_fes":t["max_fes"],"best_fitness":"","function_evaluations":"","runtime_seconds":"","restart_count":"","operator_usage":"{}","operator_success":"{}","status":"failed","error":""}
+    base={"experiment_name":t["experiment_name"],"benchmark":t["benchmark"],"function":f"F{t['function_id']}","function_id":t["function_id"],"dimension":t["dimension"],"algorithm":t["algorithm"],"run":t["run"],"run_id":t["run"],"seed":t["seed"],"population_size":t["population_size"],"max_fes":t["max_fes"],"best_fitness":"","error_value":"","function_evaluations":"","runtime_seconds":"","restart_count":"","operator_usage":"{}","operator_success":"{}","status":"failed","success_flag":0,"error":""}
     try:
         p=build_problem(t["benchmark"], t["function_id"], t["dimension"])
         opt=build_optimizer(t["algorithm"], population_size=t["population_size"], seed=t["seed"])
         res=opt.optimize(objective=p.objective, dimension=p.dimension, lower_bound=p.lower_bound, upper_bound=p.upper_bound, max_fes=t["max_fes"], record_interval=t["record_interval"])
         meta=dict(res.metadata or {})
-        base.update({"function":p.function,"algorithm":res.algorithm,"best_fitness":res.best_fitness,"function_evaluations":res.function_evaluations,"runtime_seconds":time.perf_counter()-st,"restart_count":meta.get("restart_count",""),"operator_usage":jdump(meta.get("operator_usage",{})),"operator_success":jdump(meta.get("operator_success",{})),"status":"ok"})
+        error_value = ""
+        if getattr(p, "optimum", None) is not None:
+            error_value = float(res.best_fitness) - float(p.optimum)
+        base.update({"function":p.function,"algorithm":res.algorithm,"best_fitness":res.best_fitness,"error_value":error_value,"function_evaluations":res.function_evaluations,"runtime_seconds":time.perf_counter()-st,"restart_count":meta.get("restart_count",""),"operator_usage":jdump(meta.get("operator_usage",{})),"operator_success":jdump(meta.get("operator_success",{})),"status":"ok","success_flag":1})
         curve={"experiment_name":t["experiment_name"],"benchmark":t["benchmark"],"function":p.function,"function_id":t["function_id"],"dimension":t["dimension"],"algorithm":res.algorithm,"run":t["run"],"seed":t["seed"],"convergence_curve":res.convergence_curve,"function_evaluations":res.function_evaluations}
         return base, curve
     except Exception as e:
@@ -91,15 +98,30 @@ def summarize(rows):
         out.append({"experiment_name":g[0].get("experiment_name",""),"benchmark":b,"function":f,"function_id":fid,"dimension":dim,"algorithm":alg,"runs":len(g),"mean_best":float(np.mean(vals)) if vals else "","std_best":float(np.std(vals,ddof=1)) if len(vals)>1 else (0.0 if vals else ""),"median_best":float(np.median(vals)) if vals else "","best":float(np.min(vals)) if vals else "","worst":float(np.max(vals)) if vals else "","mean_runtime_seconds":float(np.mean(rt)) if rt else "","total_runtime_seconds":float(np.sum(rt)) if rt else "","success_count":len(ok),"failure_count":len(g)-len(ok)})
     return out
 
+def curve_csv_rows(curves):
+    rows=[]
+    for row in curves:
+        curve=list(row.get("convergence_curve") or [])
+        if not curve:
+            continue
+        total_fe=int(row.get("function_evaluations") or 0)
+        denom=max(1, len(curve)-1)
+        for idx, value in enumerate(curve):
+            fe=int(round(total_fe * idx / denom)) if len(curve)>1 else total_fe
+            rows.append({"algorithm":row.get("algorithm",""),"function_id":row.get("function_id",""),"run_id":row.get("run",""),"fe":fe,"best_so_far":value})
+    return rows
+
 def run_experiment(cfg, dry_run=False, resume=False, formal=False, confirm=False):
     if formal and not dry_run and not confirm: raise RuntimeError("Formal experiment is protected; pass --confirm-formal-run after pilot validation.")
     ds=dirs(); name=cfg.get("experiment_name","experiment"); ts=tasks(cfg)
-    raw=ds["raw"]/f"{name}_raw.csv"; summ=ds["summary"]/f"{name}_summary.csv"; curves=ds["curves"]/f"{name}_curves.jsonl"
+    raw=ds["raw"]/f"{name}_raw.csv"; summ=ds["summary"]/f"{name}_summary.csv"; curves=ds["curves"]/f"{name}_curves.jsonl"; conv=ds["raw"]/f"{name}_convergence.csv"
     if dry_run:
         print("DRY RUN"); print(f"experiment={name} tasks={len(ts)} functions={cfg.get('functions')} algorithms={cfg.get('algorithms')} runs={cfg.get('runs')} max_fes={cfg.get('max_fes')}")
         for t in ts[:20]: print(f"task F{t['function_id']} {t['algorithm']} run={t['run']} seed={t['seed']}")
         return {"dry_run":True,"planned_tasks":len(ts)}
     existing=read_existing(raw) if resume else []; done={row_key(r) for r in existing if r.get("status")=="ok"}; rows=[]; curve_rows=[]
+    if not resume and curves.exists():
+        curves.unlink()
     for t in ts:
         if resume and row_key(t) in done: continue
         print(f"[{name}][F{t['function_id']}][{t['algorithm']}][run {t['run']}] running...", flush=True)
@@ -108,7 +130,8 @@ def run_experiment(cfg, dry_run=False, resume=False, formal=False, confirm=False
     all_rows=existing+rows; write_csv(raw, all_rows, RAW_FIELDS); write_csv(summ, summarize(all_rows), SUMMARY_FIELDS)
     with curves.open("a",encoding="utf-8") as f:
         for c in curve_rows: f.write(json.dumps(c,ensure_ascii=False)+"\n")
-    print(f"raw: {raw}\nsummary: {summ}\ncurves: {curves}")
+    write_csv(conv, curve_csv_rows(curve_rows), ["algorithm","function_id","run_id","fe","best_so_far"])
+    print(f"raw: {raw}\nsummary: {summ}\ncurves: {curves}\nconvergence_csv: {conv}")
     return {"dry_run":False,"planned_tasks":len(ts)}
 
 def cli_main(default_config, description, formal=False):

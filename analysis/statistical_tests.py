@@ -96,12 +96,17 @@ def win_tie_loss(df: pd.DataFrame, target: str, alpha: float) -> pd.DataFrame:
 
 def friedman_table(df: pd.DataFrame) -> pd.DataFrame:
     pivot = function_algorithm_means(df).dropna(axis=1)
-    if pivot.shape[1] < 2:
-        raise ValueError("Friedman test requires at least two algorithms.")
-    stat, p_value = friedmanchisquare(*[pivot[c].to_numpy() for c in pivot.columns])
     out = average_rank(df)
+    if pivot.shape[1] < 3:
+        warnings.warn("Friedman test requires at least three algorithms; writing rank-only fallback.", RuntimeWarning)
+        out["friedman_statistic"] = ""
+        out["friedman_p_value"] = ""
+        out["friedman_status"] = "skipped_less_than_three_algorithms"
+        return out
+    stat, p_value = friedmanchisquare(*[pivot[c].to_numpy() for c in pivot.columns])
     out["friedman_statistic"] = float(stat)
     out["friedman_p_value"] = float(p_value)
+    out["friedman_status"] = "ok"
     return out
 
 
