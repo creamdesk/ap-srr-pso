@@ -143,6 +143,9 @@ python -m experiments.run_ablation6 --config configs/ablation6_pilot.yaml
 python -m analysis.generate_tables --experiment ablation6_pilot
 python -m analysis.generate_figures --experiment ablation6_pilot --no-png
 
+# Manual reproducibility check: move existing pilot artifacts aside and regenerate them.
+python scripts/check_pilot_pipeline.py
+
 # Six-group ARPSO-SRR ablation pilot; not a formal paper result unless runs/max_fes are raised.
 python -m experiments.run_ablation6
 
@@ -161,7 +164,34 @@ python -m analysis.generate_figures --experiment cec2017_30d_probe --no-png
 
 CI intentionally runs smoke tests, config validation, dry-runs, and pytest only. It does not run full CEC2017 experiments.
 
-## 九、结果目录
+## 九、Pilot pipeline from clean clone
+
+Use this sequence to verify that a fresh clone can regenerate the pilot CSV, LaTeX tables, and vector figures. The pilot is still not a formal paper result.
+
+```bash
+git clone https://github.com/creamdesk/ap-srr-pso.git
+cd ap-srr-pso
+python -m venv .venv
+.\.venv\Scripts\python -m pip install --upgrade pip setuptools wheel
+.\.venv\Scripts\pip install -r requirements.txt
+
+.\.venv\Scripts\python -m experiments.smoke_test
+.\.venv\Scripts\python -m experiments.validate_configs
+.\.venv\Scripts\python -m experiments.run_ablation6 --config configs/ablation6_pilot.yaml
+.\.venv\Scripts\python -m analysis.generate_tables --experiment ablation6_pilot
+.\.venv\Scripts\python -m analysis.generate_figures --experiment ablation6_pilot --no-png
+.\.venv\Scripts\python -m pytest -q
+```
+
+For a one-command manual check after dependencies are installed:
+
+```bash
+.\.venv\Scripts\python scripts/check_pilot_pipeline.py
+```
+
+`results/`, `paper/figures/`, and `paper/tables/` are generated and ignored for pilot runs. If a future paper `main.tex` directly `\input{}`s tables or `\includegraphics{}`s figures, run `generate_tables` and `generate_figures` before compiling, or deliberately commit the final formal paper-facing artifacts. Do not commit pilot raw results.
+
+## 十、结果目录
 
 ```text
 results/raw/       raw per-run CSV files
@@ -174,7 +204,7 @@ paper/figures/     synced paper figure outputs
 
 `results/` is ignored by Git by default. Do not commit large experiment outputs unless a tiny example artifact is intentionally selected.
 
-## 十、当前阶段任务
+## 十一、当前阶段任务
 
 当前阶段不是直接投稿，而是先完成 SCI 工程化基础：
 
@@ -187,7 +217,7 @@ paper/figures/     synced paper figure outputs
 7. 扩展到完整 30 runs；
 8. 自动生成统计检验和论文图表。
 
-## 十一、命名规则
+## 十二、命名规则
 
 - 仓库名：`ap-srr-pso`
 - 主方法：`AP-SRR-PSO`
@@ -195,13 +225,13 @@ paper/figures/     synced paper figure outputs
 - 中文主方法：`自适应组合搜索资源重分配粒子群优化算法`
 - 不再使用：`ARPSO-v4` 作为论文方法名
 
-## 十二、GitHub Actions
+## 十三、GitHub Actions
 
 The `tests` workflow installs Python dependencies, runs the smoke test, validates core configs, checks protected dry-runs, checks table/figure entry points, and runs pytest. Full CEC2017 experiments are deliberately excluded from CI.
 
 Recent CI failures were caused by API drift between tests and `experiments.run_experiment`, plus Node 20 deprecation warnings from older GitHub actions. The workflow now uses current `actions/checkout` and `actions/setup-python` releases and validates the stable dry-run APIs.
 
-## 十三、TODO
+## 十四、TODO
 
 1. Add stronger baselines such as CLPSO, HPSO-TVAC, JADE/SHADE, and CMA-ES before journal submission.
 2. Run 30D pilot before any formal 30-run experiment.
@@ -209,7 +239,7 @@ Recent CI failures were caused by API drift between tests and `experiments.run_e
 4. Add richer convergence/restart behavior figures once formal data are available.
 5. Keep engineering validation data separate from formal paper results.
 
-## 十四、注意事项
+## 十五、注意事项
 
 1. `legacy/` 只做旧成果归档，不直接修改；
 2. 大规模实验结果不要直接提交到 GitHub；

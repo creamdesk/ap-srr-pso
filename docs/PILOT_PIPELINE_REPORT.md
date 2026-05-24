@@ -202,3 +202,93 @@ Only after the 30D pilot produces stable CSV, tables, figures, and runtime estim
 ```bash
 python -m experiments.run_cec2017_main --config configs/cec2017_30d.yaml --confirm-formal-run
 ```
+
+## 10. Commit Safety and Remote Sync
+
+Local pilot pipeline commit:
+
+- `f15bf9d chore: validate pilot ablation pipeline`
+
+Safety backups created before pushing:
+
+- `backup/0001-chore-validate-pilot-ablation-pipeline.patch`
+- `backup/ap-srr-pso-f15bf9d.bundle`
+
+Push status:
+
+- `git push origin main` succeeded.
+- `origin/main` advanced from `adb1658` to `f15bf9d`.
+- No force push, rebase, reset, or GitHub API commit workaround was used.
+- GitHub Actions passed on `f15bf9d`.
+
+Follow-up hardening status:
+
+- A local hardening commit adds `scripts/check_pilot_pipeline.py` and clean-clone documentation.
+- Normal push attempts for this follow-up commit failed with GitHub HTTPS 443 connection reset / connection timeout.
+- No force push or GitHub API commit workaround was used for the follow-up commit.
+- A backup patch and bundle were created for the local follow-up commit under `backup/`.
+
+## 11. Git Ignore and Paper Integration Risk
+
+Current ignore policy:
+
+- `results/` is ignored.
+- `paper/figures/` is ignored.
+- `paper/tables/` is ignored.
+- pilot raw/summary/stat/table/figure outputs are generated artifacts and are not committed.
+
+Current paper status:
+
+- There is no tracked `paper/main.tex` in the repository.
+- Therefore the current clean clone has no paper build target and no tracked LaTeX file that directly references ignored pilot figures or tables.
+- The current paper build limitation is missing paper source, not missing generated figures or tables.
+
+Future paper integration rule:
+
+- Do not commit pilot raw results.
+- For final formal paper results, either run `analysis.generate_tables` and `analysis.generate_figures` before compiling the paper, or deliberately commit the final paper-facing files under `paper/tables/` and `paper/figures/`.
+- If a future `paper/main.tex` directly references `paper/tables/*.tex` or `paper/figures/*.pdf`, the CI or README must make the generation step explicit before paper compilation.
+
+## 12. Clean Clone Reproducibility
+
+Fresh clone reproduction sequence:
+
+```bash
+git clone https://github.com/creamdesk/ap-srr-pso.git
+cd ap-srr-pso
+python -m venv .venv
+.\.venv\Scripts\python -m pip install --upgrade pip setuptools wheel
+.\.venv\Scripts\pip install -r requirements.txt
+.\.venv\Scripts\python -m experiments.smoke_test
+.\.venv\Scripts\python -m experiments.validate_configs
+.\.venv\Scripts\python -m experiments.run_ablation6 --config configs/ablation6_pilot.yaml
+.\.venv\Scripts\python -m analysis.generate_tables --experiment ablation6_pilot
+.\.venv\Scripts\python -m analysis.generate_figures --experiment ablation6_pilot --no-png
+.\.venv\Scripts\python -m pytest -q
+```
+
+Manual one-command pilot artifact regeneration after dependencies are installed:
+
+```bash
+.\.venv\Scripts\python scripts\check_pilot_pipeline.py
+```
+
+The manual script moves existing `ablation6_pilot` artifacts to `results/tmp/pilot_pipeline_backup/`, regenerates raw/summary/table/figure outputs, and checks that key CSV, LaTeX, PDF, and PGFPlots/TikZ files are non-empty. It is intentionally not part of normal CI because it runs real pilot optimization.
+
+Clean clone check performed:
+
+- Clone directory: `D:\github repository\ap-srr-pso-clean-20260524-102725`
+- The clone started with no existing `ablation6_pilot` artifacts.
+- A fresh `.venv` was created.
+- Dependencies were installed from `requirements.txt`; `setuptools` was downgraded to the pinned `<81` version.
+- `scripts/check_pilot_pipeline.py` regenerated the pilot outputs successfully.
+- `pytest -q` passed with `18 passed, 1 warning`.
+
+## 13. Remaining Gates Before Formal Experiments
+
+Before formal 30-run CEC2017 experiments:
+
+- GitHub Actions must pass on the latest pushed commit.
+- A clean clone must regenerate pilot outputs from an empty result state.
+- The paper source must either generate ignored figure/table artifacts before compilation or commit final formal paper-facing artifacts intentionally.
+- A larger non-formal pilot should be run before full formal scale, for example 10D with `F1-F10`, `runs=5`, and a controlled MaxFEs budget.
