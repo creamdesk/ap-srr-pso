@@ -41,6 +41,25 @@ def build_optimizer(name: str, *, population_size: int, seed: int | None = None,
         return PSOAW(**common, **kwargs)
     if key in {"ARPSO-SRR", "ARPSO-SRR-BASE", "ARPSO-V4"}:
         return ARPSOSRR(**common, **kwargs)
+    if key in {"ARPSO-LOCAL", "ARPSO-SRR-LOCAL"}:
+        return _named(ARPSOSRR(**common, local_ratio=1.0, **kwargs), "ARPSO-Local")
+    if key in {"ARPSO-GLOBAL", "ARPSO-SRR-GLOBAL"}:
+        return _named(ARPSOSRR(**common, local_ratio=0.0, **kwargs), "ARPSO-Global")
+    if key in {"ARPSO-FIXED", "ARPSO-SRR-FIXED"}:
+        return _named(ARPSOSRR(**common, rho_min=0.20, rho_max=0.20, **kwargs), "ARPSO-Fixed")
+    if key in {"ARPSO-EIS", "ARPSO-SRR-EIS"}:
+        opt = ConservativeAPSRRPSO(
+            **common,
+            enable_rca=False,
+            stagnation_threshold=35,
+            diversity_threshold=0.04,
+            rho_min=0.05,
+            rho_max=0.25,
+            elite_ratio=0.15,
+            local_sigma=0.05,
+            **kwargs,
+        )
+        return _with_operators(opt, ["opposition"], "ARPSO-EIS")
 
     if key in {"AP-SRR-PSO", "APSRRPSO", "AP-SRR-PSO-V2", "AP-SRR-PSO-BALANCED"}:
         return _named(ConservativeAPSRRPSO(**common, **kwargs), "AP-SRR-PSO")

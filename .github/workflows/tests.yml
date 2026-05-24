@@ -17,10 +17,16 @@ jobs:
           python -m pip install --upgrade pip 'setuptools<81' wheel
           pip install -r requirements.txt
       - name: Smoke test
-        run: python experiments/smoke_test.py
+        run: python -m experiments.smoke_test
       - name: Validate configs
-        run: python experiments/validate_configs.py configs/mini_validation.yaml configs/cec2017_30d_probe.yaml configs/cec2017_30d_pilot.yaml
+        run: python -m experiments.validate_configs configs/mini_validation.yaml configs/cec2017_30d_probe.yaml configs/cec2017_30d_pilot.yaml configs/ablation6.yaml
+      - name: Dry-run ablation6
+        run: python -m experiments.run_ablation6 --dry-run
       - name: Dry-run protected main experiment
-        run: python experiments/run_cec2017_main.py --dry-run
+        run: python -m experiments.run_cec2017_main --dry-run
+      - name: Table and figure entrypoint smoke
+        run: |
+          python -m analysis.generate_tables --experiment ci_missing
+          python -m analysis.generate_figures --experiment ci_missing --no-png
       - name: Run tests
         run: python -m pytest tests -q

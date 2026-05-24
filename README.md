@@ -98,7 +98,7 @@ ap-srr-pso/
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip "setuptools<81" wheel
 pip install -r requirements.txt
 ```
 
@@ -107,14 +107,16 @@ Windows PowerShell：
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\activate
-python -m pip install --upgrade pip setuptools wheel
+python -m pip install --upgrade pip "setuptools<81" wheel
 pip install -r requirements.txt
 ```
+
+`setuptools<81` is required because the current `opfunu` CEC adapter imports `pkg_resources`.
 
 ## 七、快速自检
 
 ```bash
-python experiments/smoke_test.py
+python -m experiments.smoke_test
 ```
 
 预期输出：
@@ -125,7 +127,49 @@ PSO 小规模测试通过
 结果文件已生成
 ```
 
-## 八、当前阶段任务
+## 八、可复现实验入口
+
+These commands are the supported entry points after cloning the repository:
+
+```bash
+# Smoke test; runs quickly and writes results/summary/smoke_test_result.csv.
+python -m experiments.smoke_test
+
+# Six-group ARPSO-SRR ablation dry-run; does not execute expensive optimization.
+python -m experiments.run_ablation6 --dry-run
+
+# Six-group ARPSO-SRR ablation pilot; not a formal paper result unless runs/max_fes are raised.
+python -m experiments.run_ablation6
+
+# Protected CEC2017 30D main experiment dry-run.
+python -m experiments.run_cec2017_main --dry-run
+
+# Formal run is protected and requires explicit confirmation.
+python -m experiments.run_cec2017_main --confirm-formal-run
+
+# Generate LaTeX tables from existing result CSVs.
+python -m analysis.generate_tables --experiment cec2017_30d_probe
+
+# Generate vector figures from existing result CSVs/JSONL.
+python -m analysis.generate_figures --experiment cec2017_30d_probe --no-png
+```
+
+CI intentionally runs smoke tests, config validation, dry-runs, and pytest only. It does not run full CEC2017 experiments.
+
+## 九、结果目录
+
+```text
+results/raw/       raw per-run CSV files
+results/summary/   grouped mean/std/runtime summaries
+results/stats/     Wilcoxon/Friedman/Holm/average-rank CSVs
+results/figures/   PDF/SVG paper figures
+paper/tables/      LaTeX table outputs
+paper/figures/     synced paper figure outputs
+```
+
+`results/` is ignored by Git by default. Do not commit large experiment outputs unless a tiny example artifact is intentionally selected.
+
+## 十、当前阶段任务
 
 当前阶段不是直接投稿，而是先完成 SCI 工程化基础：
 
@@ -138,7 +182,7 @@ PSO 小规模测试通过
 7. 扩展到完整 30 runs；
 8. 自动生成统计检验和论文图表。
 
-## 九、命名规则
+## 十一、命名规则
 
 - 仓库名：`ap-srr-pso`
 - 主方法：`AP-SRR-PSO`
@@ -146,7 +190,21 @@ PSO 小规模测试通过
 - 中文主方法：`自适应组合搜索资源重分配粒子群优化算法`
 - 不再使用：`ARPSO-v4` 作为论文方法名
 
-## 十、注意事项
+## 十二、GitHub Actions
+
+The `tests` workflow installs Python dependencies, runs the smoke test, validates core configs, checks protected dry-runs, checks table/figure entry points, and runs pytest. Full CEC2017 experiments are deliberately excluded from CI.
+
+Recent CI failures were caused by API drift between tests and `experiments.run_experiment`, plus Node 20 deprecation warnings from older GitHub actions. The workflow now uses current `actions/checkout` and `actions/setup-python` releases and validates the stable dry-run APIs.
+
+## 十三、TODO
+
+1. Add stronger baselines such as CLPSO, HPSO-TVAC, JADE/SHADE, and CMA-ES before journal submission.
+2. Run 30D pilot before any formal 30-run experiment.
+3. Review ARPSO-EIS terminology against the final paper wording.
+4. Add richer convergence/restart behavior figures once formal data are available.
+5. Keep engineering validation data separate from formal paper results.
+
+## 十四、注意事项
 
 1. `legacy/` 只做旧成果归档，不直接修改；
 2. 大规模实验结果不要直接提交到 GitHub；
